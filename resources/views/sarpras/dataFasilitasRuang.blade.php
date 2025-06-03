@@ -1,231 +1,227 @@
 @extends('layout.sarprasLayout')
 
+<head>
+    <link rel="icon" href="{{ asset('images/ITK_1.png') }}" type="image/png" />
+    @section('title', 'Fasilitas Ruang')
+</head>
+
 @section('content')
-<div class="p-8">
-    <div class="bg-white rounded-md w-full py-10 px-10">
-        <h1 class="text-primary font-bold text-xl mb-4">Daftar Fasilitas Gedung</h1>
+<div class="p-4 sm:p-8 mt-20">
+    <div class="bg-white rounded-md w-full py-6 sm:py-10 px-4 sm:px-10 shadow">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 space-y-4 sm:space-y-0">
+            <h1 class="text-primary font-bold text-xl">Daftar Fasilitas Ruang</h1>
+            <input id="search" type="text" placeholder="Cari fasilitas..."
+                class="input input-bordered bg-white text-gray-600 placeholder-gray-600 border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary w-full sm:w-64 text-sm" />
+        </div>
         <hr class="border-black mb-6">
 
-        <div class="flex justify-end items-center mb-4">
-            <div>
-                <input id="search" type="text" placeholder="Cari fasilitas..."
-                    class="input input-bordered bg-white text-gray-600 placeholder-gray-600 border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary w-64 text-sm" />
-            </div>
-        </div>
-
         <div class="space-y-6">
-            <!-- Indoor and Outdoor Facilities with Flexbox -->
-            <div class="flex justify-between space-x-8">
-                <div class="w-full">
-                    <h2 class="text-lg font-bold text-primary mb-2">Daftar Fasilitas</h2>
-                    <div>
-                        <table class="table w-full text-sm text-left text-gray-600 border" id="facilitiesTable">
-                            <thead class="bg-gray-100 text-xs uppercase text-gray-700">
-                                <tr>
-                                    <th class="px-6 py-3">Gedung</th>
-                                    <th class="px-6 py-3">Ruang</th>
-                                    <th class="px-6 py-3">Nama Fasilitas</th>
-                                    <th class="px-6 py-3">Jumlah</th>
-                                    <th class="px-6 py-3">Deskripsi</th>
-                                    <th class="px-6 py-3">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($facilities as $facility)
-                                <tr class="facility-row" data-id="{{ $facility->id }}"
-                                    data-name="{{ $facility->facility_name }}"
-                                    data-building="{{ $facility->room->building->building_name }}"
-                                    data-description="{{ $facility->description }}"
-                                    data-number="{{ $facility->number_units }}">
-                                    <td>{{ $facility->room->building->building_name ?? '-' }}</td>
-                                    <td class="px-6 py-3 capitalize">{{ $facility->room->room_name }}</td>
-                                    <td class="px-6 py-3">{{ $facility->facility_name }}</td>
-                                    <td class="px-6 py-3">{{ $facility->number_units }}</td>
-                                    <td class="px-6 py-3">{{ $facility->description }}</td>
-                                    <td class="px-6 py-3 relative">
-                                        <div class="relative inline-block text-left">
-                                            <button onclick="toggleDropdown(this)"
-                                                class="text-primary hover:underline">Aksi ▼</button>
-                                            <div
-                                                class="dropdown-menu hidden absolute right-0 mt-2 w-36 bg-white border rounded shadow-lg z-10">
-                                                <button onclick="showFacilityDetails(this)"
-                                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left">Detail</button>
-                                                <button onclick="editFacility(this)"
-                                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left">Edit</button>
-                                                <button onclick="deleteFacility(this)"
-                                                    class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100 w-full text-left">Hapus</button>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+            <!-- Table wrapper for horizontal scroll on mobile -->
+            <div class="overflow-x-auto">
+                <table class="table w-full min-w-[600px] text-sm text-left text-gray-600 border" id="facilitiesTable">
+                    <thead class="bg-primary text-xs uppercase text-white">
+                        <tr>
+                            <th class="px-4 py-3">Gedung</th>
+                            <th class="px-4 py-3">Ruang</th>
+                            <th class="px-4 py-3">Nama Fasilitas</th>
+                            <th class="px-4 py-3">Jumlah</th>
+                            <th class="px-4 py-3">Deskripsi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($facilities as $facility)
+                        <tr class="facility-row hover:bg-gray-100 cursor-pointer" data-id="{{ $facility->id }}"
+                            data-name="{{ $facility->facility_name }}"
+                            data-building="{{ $facility->room->building->building_name }}"
+                            data-room="{{ $facility->room->room_name }}" data-description="{{ $facility->description }}"
+                            data-number="{{ $facility->number_units }}" onclick="showFacilityDetails(this)">
+                            <td class="px-4 py-2">{{ $facility->room->building->building_name ?? '-' }}</td>
+                            <td class="px-4 py-2 capitalize">{{ $facility->room->room_name }}</td>
+                            <td class="px-4 py-2">{{ $facility->facility_name }}</td>
+                            <td class="px-4 py-2">{{ $facility->number_units }}</td>
+                            <td class="px-4 py-2">{{ $facility->description }}</td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+
+                </table>
             </div>
         </div>
     </div>
 </div>
 
-{{-- Modal Detail Laporan --}}
-<div id="facilityDetailModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
-    <div class="bg-white p-6 rounded-lg w-[90%] md:w-2/3 relative">
-        <div class="flex justify-between items-center mb-4">
-            <h2 id="facilityDetailTitle" class="text-lg font-bold text-primary">Detail Laporan</h2>
-            <button onclick="closeModal('facilityDetailModal')"
-                class="text-gray-400 hover:text-gray-700 text-2xl font-bold">&times;</button>
+{{-- Modal Detail Fasilitas Ruang --}}
+<div id="facilityDetailModal"
+    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50 p-4">
+    <div class="bg-white p-6 rounded-lg w-full max-w-lg max-h-[80vh] overflow-auto shadow-lg">
+        <h2 class="text-lg text-primary font-bold mb-4">Detail Fasilitas Ruang</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-y-2 text-sm text-gray-700">
+            <div class="font-semibold">Gedung</div>
+            <div class="sm:col-span-2" id="buildingName">:</div>
+            <div class="font-semibold">Nama Fasilitas</div>
+            <div class="sm:col-span-2" id="facilityName">:</div>
+            <div class="font-semibold">Jumlah</div>
+            <div class="sm:col-span-2" id="numberUnits">:</div>
+            <div class="font-semibold">Deskripsi</div>
+            <div class="sm:col-span-2" id="facilityDescription">:</div>
         </div>
-
-        <div class="overflow-x-auto mb-4">
-            <table class="table w-full text-sm text-left text-gray-600 border">
-                <thead class="bg-gray-100 text-xs uppercase text-gray-700">
-                    <tr>
-                        <th class="px-6 py-3">Nomor Laporan</th>
-                        <th class="px-6 py-3">Pelapor</th>
-                        <th class="px-6 py-3">Teknisi</th>
-                        <th class="px-6 py-3">Foto</th>
-                        <th class="px-6 py-3">Status</th>
-                        <th class="px-6 py-3">Tanggal</th>
-                    </tr>
-                </thead>
-                <tbody id="facilityDetailContent">
-                    {{-- Konten laporan akan dimasukkan melalui JavaScript --}}
-                </tbody>
-            </table>
-        </div>
-
-        <div class="text-right">
+        <div class="text-right mt-4 space-x-2">
+            <button id="btnRiwayat" onclick="openRiwayatModal()" class="px-4 py-2 bg-primary text-white rounded">Riwayat
+                Laporan</button>
             <button onclick="closeModal('facilityDetailModal')"
                 class="px-4 py-2 bg-gray-400 text-white rounded hover:bg-gray-500">Tutup</button>
         </div>
     </div>
 </div>
 
+{{-- Modal Riwayat Status --}}
+<div id="riwayatModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+    <div class="bg-white p-6 rounded-lg w-full max-w-xl max-h-[80vh] overflow-y-auto shadow-lg">
+        <h2 class="text-lg font-bold text-primary mb-4">Riwayat Laporan</h2>
+        <div class="overflow-x-auto mb-4">
+            <table class="table w-full text-sm text-left text-gray-600 border">
+                <thead class="bg-gray-100 text-xs uppercase text-gray-700">
+                    <tr>
+                        <th class="px-4 py-3">Kode Laporan</th>
+                        <th class="px-4 py-3">Status</th>
+                        <th class="px-4 py-3">Deskripsi</th>
+                        <th class="px-4 py-3">Tanggal Selesai</th>
+                    </tr>
+                </thead>
+                <tbody id="historyContent">
+                    {{-- Isi lewat JS --}}
+                </tbody>
+            </table>
+        </div>
+        <div class="text-right">
+            <button onclick="closeRiwayatModal()" class="px-4 py-2 bg-primary text-white rounded">Tutup</button>
+        </div>
+    </div>
+</div>
+
+
+
 <script>
-// Dummy data untuk laporan fasilitas
-const laporanData = {
-    'indoor1': [{
-        no: 'L001',
-        pelapor: 'John Doe',
-        teknisi: 'Jane Smith',
-        foto: 'https://via.placeholder.com/150',
-        status: 'Diperbaiki',
-        tanggal: '2025-04-20',
-        riwayatStatus: [{
-                status: 'Diajukan',
-                tanggal: '2025-04-10'
-            },
-            {
-                status: 'Diperbaiki',
-                tanggal: '2025-04-20'
-            }
-        ],
-        gedung: 'Gedung A',
-        fasilitas: 'Indoor',
-    }],
-    'indoor2': [{
-        no: 'L002',
-        pelapor: 'Alice Brown',
-        teknisi: 'Mark Johnson',
-        foto: 'https://via.placeholder.com/150',
-        status: 'Diproses',
-        tanggal: '2025-04-18',
-        riwayatStatus: [{
-                status: 'Diajukan',
-                tanggal: '2025-04-12'
-            },
-            {
-                status: 'Diproses',
-                tanggal: '2025-04-18'
-            }
-        ],
-        gedung: 'Gedung B',
-        fasilitas: 'Indoor',
-    }],
-    'outdoor1': [{
-        no: 'L003',
-        pelapor: 'Sarah Miller',
-        teknisi: 'Jake Wilson',
-        foto: 'https://via.placeholder.com/150',
-        status: 'Selesai',
-        tanggal: '2025-04-19',
-        riwayatStatus: [{
-                status: 'Diajukan',
-                tanggal: '2025-04-15'
-            },
-            {
-                status: 'Selesai',
-                tanggal: '2025-04-19'
-            }
-        ],
-        gedung: 'Gedung C',
-        fasilitas: 'Outdoor',
-    }],
-    'outdoor2': [{
-        no: 'L004',
-        pelapor: 'Kevin Clark',
-        teknisi: 'Emily Davis',
-        foto: 'https://via.placeholder.com/150',
-        status: 'Menunggu',
-        tanggal: '2025-04-17',
-        riwayatStatus: [{
-                status: 'Diajukan',
-                tanggal: '2025-04-16'
-            },
-            {
-                status: 'Menunggu',
-                tanggal: '2025-04-17'
-            }
-        ],
-        gedung: 'Gedung D',
-        fasilitas: 'Outdoor',
-    }]
-};
+    const facilites = @json($facilities);
 
-// Fungsi untuk mencari fasilitas berdasarkan nama atau deskripsi
-document.getElementById('search').addEventListener('input', function() {
-    const searchQuery = this.value.toLowerCase();
-    const facilityRows = document.querySelectorAll('.facility-row');
+    console.log('facilites', facilites);
+    // Fungsi untuk mencari fasilitas berdasarkan nama atau deskripsi
+    document.getElementById('search').addEventListener('input', function() {
+        const searchQuery = this.value.toLowerCase();
+        const facilityRows = document.querySelectorAll('.facility-row');
 
-    facilityRows.forEach(row => {
-        const name = row.getAttribute('data-name').toLowerCase();
-        const description = row.getAttribute('data-description').toLowerCase();
-        if (name.includes(searchQuery) || description.includes(searchQuery)) {
-            row.classList.remove('hidden');
-        } else {
-            row.classList.add('hidden');
+        facilityRows.forEach(row => {
+            const name = row.getAttribute('data-name').toLowerCase();
+            const description = row.getAttribute('data-description').toLowerCase();
+            const building = row.getAttribute('data-building').toLowerCase();
+            const room = row.getAttribute('data-room').toLowerCase();
+
+            if (
+                name.includes(searchQuery) ||
+                description.includes(searchQuery) ||
+                building.includes(searchQuery) ||
+                room.includes(searchQuery)
+            ) {
+                row.classList.remove('hidden');
+            } else {
+                row.classList.add('hidden');
+            }
+        });
+    });
+
+
+    function closeRiwayatModal() {
+        document.getElementById('riwayatModal').classList.add('hidden');
+    }
+
+
+    let selectedFacility = null;
+
+    function showFacilityDetails(button) {
+        const row = button.closest('tr');
+        const facilityId = row.dataset.id;
+        const name = row.dataset.name;
+        const building = row.dataset.building;
+        const number = row.dataset.number;
+        const description = row.dataset.description;
+        selectedFacility = facilites.find(f => f.id == facilityId);
+
+        if (!selectedFacility) {
+            alert('Fasilitas tidak ditemukan!');
+            return;
         }
+
+        document.getElementById('facilityName').textContent = name;
+        document.getElementById('buildingName').textContent = building;
+        document.getElementById('numberUnits').textContent = number;
+        document.getElementById('facilityDescription').textContent = description;
+
+
+        openModal('facilityDetailModal');
+    }
+
+    function openRiwayatModal() {
+        if (!selectedFacility) {
+            alert('Pilih fasilitas terlebih dahulu!');
+            return;
+        }
+
+        const tbody = document.getElementById('historyContent');
+        tbody.innerHTML = ''; // Kosongkan dulu isi tbody
+
+        if (selectedFacility.repair_reports && selectedFacility.repair_reports.length > 0) {
+            selectedFacility.repair_reports.forEach(report => {
+                const kodeLaporan = report.id ? String(report.id).padStart(4, '0') : '-';
+                const status = report.status ?? '-';
+                const deskripsi = report.damage_description ?? '-';
+                const tanggalSelesai = report.updated_at ? new Date(report.updated_at).toLocaleDateString() : '-';
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                <td class="px-6 py-3">${kodeLaporan}</td>
+                <td class="px-6 py-3">${status}</td>
+                <td class="px-6 py-3">${deskripsi}</td>
+                <td class="px-6 py-3">${tanggalSelesai}</td>
+            `;
+                tbody.appendChild(tr);
+            });
+        } else {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td class="px-6 py-3 text-center" colspan="4">Tidak ada riwayat laporan</td>`;
+            tbody.appendChild(tr);
+        }
+
+        openModal('riwayatModal');
+    }
+
+
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).classList.add('hidden');
+    }
+
+    // Fungsi filter tabel berdasarkan input search
+    document.getElementById('search').addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        const table = document.getElementById('facilitiesTable');
+        const rows = table.querySelectorAll('tbody tr');
+
+        rows.forEach(row => {
+            // Ambil semua teks di setiap kolom dalam satu baris
+            const rowText = row.textContent.toLowerCase();
+
+            // Jika rowText mengandung searchTerm, tampilkan baris, jika tidak sembunyikan
+            if (rowText.includes(searchTerm)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
     });
-});
 
-// Render laporan detail ke dalam modal
-function showFacilityDetails(facilityId) {
-    const laporanForFacility = laporanData[facilityId] || [];
-    const modal = document.getElementById('facilityDetailModal');
-    const facilityDetailContent = document.getElementById('facilityDetailContent');
-
-    let detailContent = '';
-    laporanForFacility.forEach(laporan => {
-        detailContent += `
-            <tr>
-                <td class="px-6 py-3">${laporan.no}</td>
-                <td class="px-6 py-3">${laporan.pelapor}</td>
-                <td class="px-6 py-3">${laporan.teknisi}</td>
-                <td class="px-6 py-3"><img src="${laporan.foto}" alt="Foto Laporan" class="w-20 h-20 object-cover"></td>
-                <td class="px-6 py-3">${laporan.status}</td>
-                <td class="px-6 py-3">${laporan.tanggal}</td>
-            </tr>
-        `;
-    });
-
-    facilityDetailContent.innerHTML = detailContent;
-    modal.classList.remove('hidden');
-}
-
-function closeModal(modalId) {
-    document.getElementById(modalId).classList.add('hidden');
-}
+    function openModal(modalId) {
+        document.getElementById(modalId).classList.remove('hidden');
+    }
 </script>
 
 @endsection

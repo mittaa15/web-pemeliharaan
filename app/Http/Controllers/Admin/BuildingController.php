@@ -4,10 +4,13 @@ namespace App\Http\Controllers\Admin;
 
 use App\Models\Building;
 use App\Models\Room;
+use App\Models\Notification;
 use App\Models\RoomFacility;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+
 
 class BuildingController extends Controller
 {
@@ -62,23 +65,64 @@ class BuildingController extends Controller
     /**
      * Update the specified resource in storage.
      */
+    // public function update(Request $request, Building $building)
+    // {
+    //     $request->validate([
+    //         'building_name' => 'required|string|max:255',
+    //         'description' => 'nullable|string',
+    //     ]);
+
+    //     // Debug sebelum update
+    //     // dd('sebelum update', $building->toArray());
+
+    //     $building->update([
+    //         'building_name' => $request->building_name,
+    //         'description' => $request->description,
+    //     ]);
+
+    //     // Debug sesudah update
+    //     // dd('sesudah update', $building->fresh()->toArray());
+
+    //     return redirect('/admin-data-gedung')->with('success', 'Gedung berhasil diperbarui.');
+    // }
+
     public function update(Request $request, Building $building)
     {
-        // dd($request->all());
+        // dd($request->all()); // cek data
+
         $request->validate([
             'building_name' => 'required|string|max:255',
             'description' => 'nullable|string',
         ]);
 
-        // Update data gedung
         $building->update([
             'building_name' => $request->building_name,
             'description' => $request->description,
         ]);
 
-        // Redirect ke halaman dengan pesan sukses
+        // dd($building->fresh()->toArray());
+
         return redirect('/admin-data-gedung')->with('success', 'Gedung berhasil diperbarui.');
     }
+
+    // public function update(Request $request, Building $id)
+    // {
+    //     // dd($request->all()); // cek data
+
+    //     $request->validate([
+    //         'building_name' => 'required|string|max:255',
+    //         'description' => 'nullable|string',
+    //     ]);
+
+    //     $id->update([
+    //         'building_name' => $request->building_name,
+    //         'description' => $request->description,
+    //     ]);
+
+    //     dd($id->fresh()->toArray());
+    //     return redirect('/admin-data-gedung')->with('success', 'Gedung berhasil diperbarui.');
+    // }
+
 
     /**
      * Remove the specified resource from storage.
@@ -87,6 +131,8 @@ class BuildingController extends Controller
 
     public function destroy(Building $building)
     {
+        Log::info('Menerima request delete untuk building:', ['id' => $building->id]);
+
         try {
             // Ambil semua ruangan di gedung ini
             $rooms = Room::where('id_building', $building->id)->get();
@@ -105,8 +151,12 @@ class BuildingController extends Controller
             // Hapus gedung
             $building->delete();
 
+            // ✅ LOG setelah berhasil hapus
+            Log::info('Building deleted:', ['id' => $building->id]);
+
             return redirect()->back()->with('success', 'Gedung dan semua data terkait berhasil dihapus.');
         } catch (\Exception $e) {
+            Log::error('Gagal menghapus:', ['error' => $e->getMessage()]);
             return redirect()->back()->with('error', 'Gagal menghapus gedung: ' . $e->getMessage());
         }
     }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Models\BuildingFacility;
 use App\Http\Controllers\Controller;
+use App\Models\Notification;
 use App\Models\Building;
 use Illuminate\Http\Request;
 
@@ -17,12 +18,12 @@ class BuildingFacilityController extends Controller
         $buildings = Building::all();
 
         // Ambil fasilitas indoor
-        $indoorFacilities = BuildingFacility::with('building:id,building_name')
+        $indoorFacilities = BuildingFacility::with('building:id,building_name', 'repairReports')
             ->where('location', 'indoor')
             ->get();
 
         // Ambil fasilitas outdoor
-        $outdoorFacilities = BuildingFacility::with('building:id,building_name')
+        $outdoorFacilities = BuildingFacility::with('building:id,building_name', 'repairReports')
             ->where('location', 'outdoor')
             ->get();
 
@@ -60,9 +61,30 @@ class BuildingFacilityController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(BuildingFacility $buildingFacility)
+    // public function show(BuildingFacility $buildingFacility)
+    // {
+    //     $buildingFacility->load(['building', 'repairReports']);
+
+    //     return response()->json([
+    //         'status' => true,
+    //         'data' => $buildingFacility
+    //     ]);
+    // }
+
+    public function show($id)
     {
-        //
+        $facility = BuildingFacility::with(['building', 'repairReports'])->findOrFail($id);
+
+        return response()->json([
+            'status' => true,
+            'data' => [
+                'id' => $facility->id,
+                'id_building' => $facility->id_building,
+                'facility_name' => $facility->facility_name,
+                'building' => $facility->building,
+                'repair_reports' => $facility->repairReports,
+            ],
+        ]);
     }
 
     /**
@@ -76,27 +98,50 @@ class BuildingFacilityController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, BuildingFacility $buildingFacility)
+    // public function update(Request $request, BuildingFacility $buildingFacility)
+    // {
+    //     // dd($request->all());
+    //     $request->validate([
+    //         'facility_name' => 'required|string|max:255',
+    //         'description' => 'nullable|string',
+    //     ]);
+
+    //     // Update data gedung
+    //     $buildingFacility->update([
+    //         'facility_name' => $request->facility_name,
+    //         'description' => $request->description,
+    //     ]);
+
+    //     // Redirect ke halaman dengan pesan sukses
+    //     return redirect('/admin-data-fasilitas-gedung')->with('success', 'Fasilitas Gedung berhasil diperbarui.');
+    // }
+
+    public function update(Request $request, $id)
     {
-        // dd($request->all());
-        $request->validate([
+        $facility = BuildingFacility::findOrFail($id);
+
+        $validated = $request->validate([
             'facility_name' => 'required|string|max:255',
             'description' => 'nullable|string',
+            // validasi lainnya jika ada
         ]);
 
-        // Update data gedung
-        $buildingFacility->update([
-            'facility_name' => $request->facility_name,
-            'description' => $request->description,
-        ]);
+        $facility->update($validated);
 
-        // Redirect ke halaman dengan pesan sukses
         return redirect('/admin-data-fasilitas-gedung')->with('success', 'Fasilitas Gedung berhasil diperbarui.');
     }
+
+
 
     /**
      * Remove the specified resource from storage.
      */
+    // public function destroy(BuildingFacility $buildingFacility)
+    // {
+    //     $buildingFacility->delete();
+
+    //     return redirect('/admin-data-fasilitas-gedung')->with('success', 'Fasilitas Gedung berhasil dihapus.');
+    // }
     public function destroy(BuildingFacility $buildingFacility)
     {
         $buildingFacility->delete();

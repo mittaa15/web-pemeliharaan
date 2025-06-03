@@ -6,3 +6,7 @@
     font-family: "Poppins";
     src: url("../fonts/Poppins-Regular.ttf");
 }
+
+@plugin "daisyui" {
+    themes: light --default;
+}

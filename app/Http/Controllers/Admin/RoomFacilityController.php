@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Models\RoomFacility;
 use App\Models\Room;
+use App\Models\Notification;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
@@ -17,7 +18,7 @@ class RoomFacilityController extends Controller
         $rooms = Room::with(['building:id,building_name'])->get(['id', 'room_name', 'id_building']);
 
         // Tambahkan eager loading sampai ke building
-        $facilities = RoomFacility::with('room.building:id,building_name')->get();
+        $facilities = RoomFacility::with('room.building:id,building_name', 'repairReports')->get();
 
         return view('admin.dataFasilitasRuangAdmin', compact('facilities', 'rooms'));
     }

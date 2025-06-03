@@ -3,42 +3,45 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Hash;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
- */
 class UserFactory extends Factory
 {
-    /**
-     * The current password being used by the factory.
-     */
-    protected static ?string $password;
+    // Tentukan model yang factory ini buat
+    protected $model = \App\Models\User::class;
 
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+    public function definition()
     {
         return [
-            'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
-            'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('password'),
-            'remember_token' => Str::random(10),
+            'name' => $this->faker->name(),
+            'email' => $this->faker->unique()->safeEmail(),
+            'password' => Hash::make('password'), // default password: password
+            'role' => 'user',                      // default role user
+            'isVerified' => $this->faker->boolean(80), // 80% chance sudah verified
+            'verification_token' => Str::random(32),   // token random
         ];
     }
 
-    /**
-     * Indicate that the model's email address should be unverified.
-     */
-    public function unverified(): static
+    // State untuk user yang sudah verified (optional)
+    public function verified()
     {
-        return $this->state(fn (array $attributes) => [
-            'email_verified_at' => null,
-        ]);
+        return $this->state(function (array $attributes) {
+            return [
+                'isVerified' => true,
+                'verification_token' => null,
+            ];
+        });
+    }
+
+    // State untuk user yang belum verified (optional)
+    public function unverified()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'isVerified' => false,
+                'verification_token' => Str::random(32),
+            ];
+        });
     }
 }

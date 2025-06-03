@@ -1,19 +1,24 @@
 @extends('layout.adminLayout')
 
+<head>
+    <link rel="icon" href="{{ asset('images/ITK_1.png') }}" type="image/png" />
+    @section('title', 'Fasilitas Ruang')
+</head>
+
 @section('content')
-<div class="p-8">
+<div class="p-8 mt-20">
     <div class="bg-white rounded-md w-full py-10 px-10">
-        <h1 class="text-primary font-bold text-xl mb-4">Daftar Fasilitas Gedung</h1>
+        <h1 class="text-primary font-bold text-xl mb-4">Daftar Fasilitas Ruang</h1>
         <hr class="border-black mb-6">
 
-        <div class="flex justify-between items-center mb-4">
+        <div class="flex flex-col md:flex-row justify-between items-center mb-4 space-y-2 md:space-y-0">
             <button onclick="openModal('addFacilityModal')"
-                class="bg-primary text-white px-4 py-2 rounded hover:bg-blue-700 text-sm">
+                class="bg-primary text-white px-4 py-2 rounded hover:bg-blue-700 text-sm w-full md:w-auto text-center">
                 + Tambah Data
             </button>
-            <div>
+            <div class="w-full md:w-64">
                 <input id="search" type="text" placeholder="Cari fasilitas..."
-                    class="input input-bordered bg-white text-gray-600 placeholder-gray-600 border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary w-64 text-sm" />
+                    class="input input-bordered bg-white text-gray-600 placeholder-gray-600 border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary w-full text-sm" />
             </div>
         </div>
 
@@ -23,7 +28,7 @@
                     <h2 class="text-lg font-bold text-primary mb-2">Facilities</h2>
                     <div>
                         <table class="table w-full text-sm text-left text-gray-600 border" id="facilitiesTable">
-                            <thead class="bg-gray-100 text-xs uppercase text-gray-700">
+                            <thead class="bg-primary text-xs uppercase text-white">
                                 <tr>
                                     <th class="px-6 py-3">Gedung</th>
                                     <th class="px-6 py-3">Ruang</th>
@@ -77,7 +82,7 @@
 
 <!-- Modal Tambah -->
 <div id="addFacilityModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-    <div class="bg-white p-6 rounded-lg w-1/2">
+    <div class="bg-white p-6 rounded-lg w-full max-w-md mx-4 sm:mx-auto">
         <h2 class="text-lg font-bold mb-4 text-primary">Tambah Fasilitas</h2>
         <form id="addFacilityForm" action="{{ route('create_room_facility') }}" method="POST">
             @csrf
@@ -121,7 +126,7 @@
 
 <!-- Modal Detail -->
 <div id="detailFacilityModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-    <div class="bg-white p-6 rounded-lg w-1/2">
+    <div class="bg-white p-6 rounded-lg w-full max-w-md mx-4 sm:mx-auto">
         <h2 class="text-lg font-bold mb-4 text-primary">Detail Fasilitas</h2>
 
         <div class="grid grid-cols-3 gap-y-2 text-sm text-gray-700">
@@ -138,17 +143,43 @@
             <div class="col-span-2" id="facilityDescription">:</div>
         </div>
 
-        <div class="mt-6 flex justify-end">
+        <div class="text-right mt-4">
+            <button id="btnRiwayat" onclick="openRiwayatModal()" class="px-4 py-2 bg-primary text-white rounded">Riwayat
+                Laporan</button>
             <button onclick="closeModal('detailFacilityModal')"
-                class="bg-primary text-white px-4 py-2 rounded hover:bg-blue-700 text-sm">Tutup</button>
+                class="px-4 py-2 bg-gray-400 text-white rounded hover:bg-gray-500">Tutup</button>
         </div>
     </div>
 </div>
 
+{{-- Modal Riwayat Status --}}
+<div id="riwayatModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+    <div class="bg-white p-6 rounded-lg w-[90%] md:w-1/2 max-h-[80vh] overflow-y-auto">
+        <h2 class="text-lg font-bold text-primary mb-4">Riwayat Laporan</h2>
+        <div class="overflow-x-auto mb-4">
+            <table class="table w-full text-sm text-left text-gray-600 border">
+                <thead class="bg-gray-100 text-xs uppercase text-gray-700">
+                    <tr>
+                        <th class="px-6 py-3">Kode Laporan</th>
+                        <th class="px-6 py-3">Status</th>
+                        <th class="px-6 py-3">Deskripsi</th>
+                        <th class="px-6 py-3">Tanggal Selesai</th>
+                    </tr>
+                </thead>
+                <tbody id="historyContent">
+                    {{-- Isi lewat JS --}}
+                </tbody>
+            </table>
+        </div>
+        <div class="text-right">
+            <button onclick="closeModal('riwayatModal')" class="px-4 py-2 bg-primary text-white rounded">Tutup</button>
+        </div>
+    </div>
+</div>
 
 <!-- Modal Edit -->
 <div id="editFacilityModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-    <div class="bg-white p-6 rounded-lg w-1/2">
+    <div class="bg-white p-6 rounded-lg w-full max-w-md mx-4 sm:mx-auto">
         <h2 class="text-lg text-primary font-bold mb-4">Edit Fasilitas</h2>
         <form id="editFacilityForm" method="POST" action="">
             @csrf
@@ -182,7 +213,7 @@
 </div>
 
 <div id="confirmDeleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-    <div class="bg-white p-6 rounded-lg w-1/3">
+    <div class="bg-white p-6 rounded-lg w-full max-w-md mx-4 sm:mx-auto">
         <h2 class="text-lg font-bold text-primary mb-4">Konfirmasi Hapus</h2>
         <p class="text-gray-700 mb-6 text-sm">Apakah Anda yakin ingin menghapus fasilitas <span
                 id="facilityToDeleteName" class=" text-primary font-semibold"></span>?</p>
@@ -196,77 +227,142 @@
 </div>
 
 <script>
-function toggleDropdown(button) {
-    const dropdown = button.nextElementSibling;
-    document.querySelectorAll('.dropdown-menu').forEach(menu => {
-        if (menu !== dropdown) {
-            menu.classList.add('hidden');
+    const facilites = @json($facilities);
+    console.log(facilites);
+
+    function toggleDropdown(button) {
+        const dropdown = button.nextElementSibling;
+        document.querySelectorAll('.dropdown-menu').forEach(menu => {
+            if (menu !== dropdown) {
+                menu.classList.add('hidden');
+            }
+        });
+        dropdown.classList.toggle('hidden');
+    }
+
+    function openModal(id) {
+        document.getElementById(id).classList.remove('hidden');
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).classList.add('hidden');
+    }
+
+    let selectedFacility = null;
+
+    function showFacilityDetails(button) {
+        const row = button.closest('tr');
+        const facilityId = row.dataset.id;
+        const name = row.dataset.name;
+        const building = row.dataset.building;
+        const number = row.dataset.number;
+        const description = row.dataset.description;
+        selectedFacility = facilites.find(f => f.id == facilityId);
+
+        if (!selectedFacility) {
+            alert('Fasilitas tidak ditemukan!');
+            return;
         }
-    });
-    dropdown.classList.toggle('hidden');
-}
 
-function openModal(id) {
-    document.getElementById(id).classList.remove('hidden');
-}
-
-function closeModal(id) {
-    document.getElementById(id).classList.add('hidden');
-}
-
-function showFacilityDetails(button) {
-    const row = button.closest('tr');
-    const name = row.dataset.name;
-    const building = row.dataset.building;
-    const number = row.dataset.number;
-    const description = row.dataset.description;
-
-    document.getElementById('facilityName').textContent = name;
-    document.getElementById('buildingName').textContent = building;
-    document.getElementById('numberUnits').textContent = number;
-    document.getElementById('facilityDescription').textContent = description;
+        document.getElementById('facilityName').textContent = name;
+        document.getElementById('buildingName').textContent = building;
+        document.getElementById('numberUnits').textContent = number;
+        document.getElementById('facilityDescription').textContent = description;
 
 
-    openModal('detailFacilityModal');
-}
+        openModal('detailFacilityModal');
+    }
 
-function editFacility(button) {
-    const row = button.closest('tr');
-    const name = row.dataset.name;
-    const number_units = row.dataset.number;
-    const description = row.dataset.description;
-    const id = row.dataset.id;
-
-    document.getElementById('editFacilityName').value = name;
-    document.getElementById('editNumberUnits').value = number_units;
-    document.getElementById('editFacilityDescription').value = description;
-
-    document.getElementById('editFacilityForm').action = `/update-facility-room/${id}`;
-    openModal('editFacilityModal');
-}
-
-let deleteFacilityId = null;
-
-function deleteFacility(button) {
-    const row = button.closest('tr');
-    deleteFacilityId = row.dataset.id;
-    const name = row.dataset.name;
-
-    // Set nama fasilitas di modal
-    document.getElementById('facilityToDeleteName').textContent = `"${name}"`;
-
-    // Tampilkan modal
-    openModal('confirmDeleteModal');
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('confirmDeleteButton').addEventListener('click', function() {
-        if (deleteFacilityId) {
-            const form = document.getElementById('deleteFacilityForm');
-            form.action = `/delete-facility-room/${deleteFacilityId}`;
-            form.submit();
+    function openRiwayatModal() {
+        if (!selectedFacility) {
+            alert('Pilih fasilitas terlebih dahulu!');
+            return;
         }
+
+        const tbody = document.getElementById('historyContent');
+        tbody.innerHTML = ''; // Kosongkan dulu isi tbody
+
+        if (selectedFacility.repair_reports && selectedFacility.repair_reports.length > 0) {
+            selectedFacility.repair_reports.forEach(report => {
+                const kodeLaporan = report.id ? String(report.id).padStart(4, '0') : '-';
+                const status = report.status ?? '-';
+                const deskripsi = report.damage_description ?? '-';
+                const tanggalSelesai = report.updated_at ? new Date(report.updated_at).toLocaleDateString() : '-';
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                <td class="px-6 py-3">${kodeLaporan}</td>
+                <td class="px-6 py-3">${status}</td>
+                <td class="px-6 py-3">${deskripsi}</td>
+                <td class="px-6 py-3">${tanggalSelesai}</td>
+            `;
+                tbody.appendChild(tr);
+            });
+        } else {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td class="px-6 py-3 text-center" colspan="4">Tidak ada riwayat laporan</td>`;
+            tbody.appendChild(tr);
+        }
+
+        openModal('riwayatModal');
+    }
+
+    function editFacility(button) {
+        const row = button.closest('tr');
+        const name = row.dataset.name;
+        const number_units = row.dataset.number;
+        const description = row.dataset.description;
+        const id = row.dataset.id;
+
+        document.getElementById('editFacilityName').value = name;
+        document.getElementById('editNumberUnits').value = number_units;
+        document.getElementById('editFacilityDescription').value = description;
+
+        document.getElementById('editFacilityForm').action = `/update-facility-room/${id}`;
+        openModal('editFacilityModal');
+    }
+
+    let deleteFacilityId = null;
+
+    function deleteFacility(button) {
+        const row = button.closest('tr');
+        deleteFacilityId = row.dataset.id;
+        const name = row.dataset.name;
+
+        // Set nama fasilitas di modal
+        document.getElementById('facilityToDeleteName').textContent = `"${name}"`;
+
+        // Tampilkan modal
+        openModal('confirmDeleteModal');
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('confirmDeleteButton').addEventListener('click', function() {
+            if (deleteFacilityId) {
+                const form = document.getElementById('deleteFacilityForm');
+                form.action = `/delete-facility-room/${deleteFacilityId}`;
+                form.submit();
+            }
+        });
     });
-});
+
+    // Fungsi filter tabel berdasarkan input search
+    document.getElementById('search').addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        const table = document.getElementById('facilitiesTable');
+        const rows = table.querySelectorAll('tbody tr');
+
+        rows.forEach(row => {
+            // Ambil semua teks di setiap kolom dalam satu baris
+            const rowText = row.textContent.toLowerCase();
+
+            // Jika rowText mengandung searchTerm, tampilkan baris, jika tidak sembunyikan
+            if (rowText.includes(searchTerm)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
 </script>
 @endsection

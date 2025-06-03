@@ -8,74 +8,177 @@
     <p class="text-gray-500 mt-1">Pantau status laporan pemeliharaan dengan mudah dan cepat.</p>
 </div>
 
-<!-- Card Section -->
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-    <!-- Card Template -->
-    @php
-        $cards = [
-            ['title' => 'Permintaan Perbaikan', 'value' => 10, 'icon' => '🛠️', 'bg' => 'bg-blue-100', 'text' => 'text-blue-800'],
-            ['title' => 'Sedang Diproses', 'value' => 10, 'icon' => '⏳', 'bg' => 'bg-yellow-100', 'text' => 'text-yellow-800'],
-            ['title' => 'Perbaikan Selesai', 'value' => 10, 'icon' => '✅', 'bg' => 'bg-green-100', 'text' => 'text-green-800'],
-            ['title' => 'Laporan Keluhan', 'value' => 10, 'icon' => '📢', 'bg' => 'bg-red-100', 'text' => 'text-red-800'],
-        ];
-    @endphp
-
-    @foreach ($cards as $card)
-        <div class="rounded-xl shadow-sm p-5 {{ $card['bg'] }}">
-            <div class="flex items-center justify-between">
-                <div>
-                    <div class="text-sm font-semibold text-gray-600">{{ $card['title'] }}</div>
-                    <div class="text-3xl font-bold mt-2 {{ $card['text'] }}">{{ $card['value'] }}</div>
-                </div>
-                <div class="text-4xl">{{ $card['icon'] }}</div>
-            </div>
-        </div>
-    @endforeach
-</div>
-
-<!-- Modal Pop-up -->
+<!-- Modal 1: Pilih Gedung dan Tipe -->
 <div id="modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 hidden">
     <div class="bg-white p-6 rounded-lg w-full max-w-md shadow-xl">
         <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-semibold text-primary">Form Laporan</h3>
-            <button id="closeModal" class="text-gray-600 hover:text-red-600 text-2xl leading-none">&times;</button>
+            <h3 class="text-lg font-semibold text-primary">Form Laporan Gedung</h3>
+            <button id="closeModal" class="text-gray-600 hover:text-red-600 text-2xl leading-none"
+                aria-label="Tutup Modal">&times;</button>
         </div>
-        <form>
+        <form id="formLaporanGedung">
+            @csrf
             <div class="mb-4">
-                <label class="block mb-1 text-gray-600">Gedung</label>
-                <select class="w-full border border-gray-300 p-2 rounded text-sm">
-                    <option selected disabled>Pilih Gedung</option>
-                    <option>Gedung A</option>
-                    <option>Gedung B</option>
+                <label class="block mb-1 bg-white text-primary px-2 rounded w-fit">Gedung</label>
+                <select id="gedungSelect"
+                    class="w-full border border-gray-300 p-2 rounded text-sm text-gray-600 bg-white">
+                    <option selected disabled value="">Pilih Gedung</option>
+                    @foreach ($buildings->sortBy('building_name') as $building)
+                    <option value="{{ $building->id }}">{{ $building->building_name }}</option>
+                    @endforeach
                 </select>
             </div>
             <div class="mb-4">
-                <label class="block mb-1 text-gray-600">Indoor/Outdoor</label>
-                <select class="w-full border border-gray-300 p-2 rounded text-sm">
-                    <option selected disabled>Pilih Tipe</option>
+                <label class="block mb-1 bg-white text-primary px-2 rounded w-fit">Indoor/Outdoor</label>
+                <select id="tipeSelect"
+                    class="w-full border border-gray-300 p-2 rounded text-sm text-gray-600 bg-white">
+                    <option selected disabled value="">Pilih Tipe</option>
                     <option>Indoor</option>
                     <option>Outdoor</option>
                 </select>
             </div>
-            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-full">
+            <button type="submit" id="submitLaporanButton"
+                class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-full">
                 Selanjutnya
             </button>
         </form>
     </div>
 </div>
 
+<!-- Modal 2: Daftar Fasilitas -->
+<div id="modalFasilitas" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 hidden">
+    <div class="bg-white p-6 rounded-lg w-full max-w-md shadow-xl max-h-[80vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold text-primary">Pilih Fasilitas</h3>
+            <button id="closeModalFasilitas" class="text-gray-600 hover:text-red-600 text-2xl leading-none"
+                aria-label="Tutup Modal">&times;</button>
+        </div>
+        <div id="fasilitasList" class="space-y-2 max-h-[60vh] overflow-y-auto pr-1">
+            <!-- List fasilitas akan dimasukkan lewat JS -->
+        </div>
+    </div>
+</div>
+
+<!-- Tombol Buka Modal -->
+@if($buildings->count() > 0)
+<button id="openModalButton" class="mt-6 bg-primary text-white px-4 py-2 rounded hover:bg-blue-700">
+    Buat Laporan Baru
+</button>
+@else
+<p class="text-red-500">Data gedung tidak tersedia. Silakan hubungi administrator.</p>
+@endif
 @endsection
 
 @section('scripts')
 <script>
-    // Menampilkan Modal saat tombol "Membuat Laporan" di klik
-    document.getElementById('openModalButton').addEventListener('click', function () {
-        document.getElementById('modal').classList.remove('hidden');
-    });
+// Helper Modal
+function closeModal(id) {
+    document.getElementById(id).classList.add('hidden');
+}
 
-    // Menutup Modal saat tombol close di klik
-    document.getElementById('closeModal').addEventListener('click', function () {
-        document.getElementById('modal').classList.add('hidden');
-    });
+function openModal(id) {
+    document.getElementById(id).classList.remove('hidden');
+}
+
+// Event Modal
+document.getElementById('openModalButton')?.addEventListener('click', () => openModal('modal'));
+document.getElementById('closeModal')?.addEventListener('click', () => closeModal('modal'));
+document.getElementById('closeModalFasilitas')?.addEventListener('click', () => closeModal('modalFasilitas'));
+
+// Ambil data dari controller
+const fasilitasIndoor = @json($indoorFacilities);
+const fasilitasOutdoor = @json($outdoorFacilities);
+const rooms = @json($rooms);
+const buildings = @json($buildings);
+
+let selectedTipe = '';
+
+function createFasilitasElement(name, callback) {
+    const div = document.createElement('div');
+    div.className = 'p-3 border rounded cursor-pointer hover:bg-gray-100 text-gray-600';
+    div.textContent = name;
+    div.addEventListener('click', callback);
+    return div;
+}
+
+document.getElementById('formLaporanGedung').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const gedung = document.getElementById('gedungSelect').value;
+    const tipe = document.getElementById('tipeSelect').value;
+    const submitBtn = document.getElementById('submitLaporanButton');
+
+    if (!gedung || !tipe) {
+        alert('Silakan pilih gedung dan tipe terlebih dahulu.');
+        return;
+    }
+
+    selectedTipe = tipe.toLowerCase();
+
+    const building = buildings.find(b => b.id == gedung);
+    const buildingName = building ? building.building_name : '';
+
+    if (!buildingName) {
+        alert('Nama gedung tidak ditemukan.');
+        return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Memuat...';
+
+    fasilitasIndoor.forEach(f => f.id_room = null);
+    fasilitasOutdoor.forEach(f => f.id_room = null);
+
+    let fasilitasListData = selectedTipe === 'indoor' ? fasilitasIndoor : fasilitasOutdoor;
+
+    if (selectedTipe === 'indoor') {
+        const roomFasilitas = rooms.map(room => ({
+            facility_name: room.room_name,
+            id_building: room.id_building,
+            id_room: room.id
+        }));
+        fasilitasListData = fasilitasListData.concat(roomFasilitas);
+    }
+
+    const filteredFasilitas = fasilitasListData.filter(item => parseInt(item.id_building) === parseInt(gedung));
+    const fasilitasListEl = document.getElementById('fasilitasList');
+    fasilitasListEl.innerHTML = '';
+
+    if (filteredFasilitas.length === 0) {
+        fasilitasListEl.innerHTML =
+            '<p class="text-gray-500">Tidak ada fasilitas ditemukan untuk pilihan ini.</p>';
+    } else {
+        filteredFasilitas.forEach(fasilitas => {
+            fasilitasListEl.appendChild(
+                createFasilitasElement(fasilitas.facility_name, () => {
+                    const encodedFasilitas = encodeURIComponent(fasilitas.facility_name);
+                    const encodedGedung = encodeURIComponent(gedung);
+                    const encodedIdRoom = encodeURIComponent(fasilitas.id_room ?? '');
+                    const encodedBuildingName = encodeURIComponent(buildingName);
+
+                    if (!fasilitas.facility_name) {
+                        alert('Data fasilitas tidak valid.');
+                        return;
+                    }
+
+                    if (!fasilitas.id_room && fasilitas.id) {
+                        const encodedFacilityId = encodeURIComponent(fasilitas.id);
+                        window.location.href =
+                            `/form-pelaporan?fasilitas=${encodedFasilitas}&tipe=${selectedTipe}&gedung=${encodedGedung}&building_name=${encodedBuildingName}&room=${encodedIdRoom}&id_facility=${encodedFacilityId}`;
+                    } else {
+                        window.location.href =
+                            `/form-pelaporan?fasilitas=${encodedFasilitas}&tipe=${selectedTipe}&gedung=${encodedGedung}&building_name=${encodedBuildingName}&room=${encodedIdRoom}`;
+                    }
+                })
+            );
+        });
+    }
+
+    closeModal('modal');
+    openModal('modalFasilitas');
+
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Selanjutnya';
+});
 </script>
 @endsection

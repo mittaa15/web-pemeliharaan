@@ -2,67 +2,151 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     @vite('resources/css/app.css')
-    <title>Dashboard</title>
+    <script>
+        const updateStatusUrl = "{{ route('update-status-sarpras') }}";
+        const csrfToken = "{{ csrf_token() }}";
+    </script>
+    <title>@yield('title', 'Dashboard')</title>
 </head>
 
 <body class="bg-white">
-    <div class="flex min-h-screen bg-white">
+    <div class="flex min-h-screen min-w-0">
+
+        <!-- Tombol Toggle Mobile -->
+        <button id="toggleSidebar" class="fixed top-4 left-4 z-50 bg-white p-2 rounded-md shadow-lg md:hidden">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-600" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+        </button>
+
+        <!-- Overlay Mobile -->
+        <div id="overlay" class="fixed inset-0 bg-black bg-opacity-40 z-30 hidden md:hidden"></div>
+
+        @php
+        $submenuOpen = request()->is('data-gedung')
+        || request()->is('sarpras-data-ruang')
+        || request()->is('data-fasilitas-gedung')
+        || request()->is('data-fasilitas-ruang');
+        @endphp
+
         <!-- Sidebar -->
-        <aside class="w-64 bg-base-200 text-base-content p-6 bg-white"
-            style="box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+        <aside id="sidebar"
+            class="w-72 md:static fixed top-10 left-0 h-screen bg-white text-base-content p-6 z-50 shadow-md transition-transform duration-300 transform -translate-x-full md:translate-x-0 md:block overflow-y-auto"
+            x-data="{ open: {{ $submenuOpen ? 'true' : 'false' }} }">
+
             <div class="mb-4 text-center">
                 <a href="/sarpras-dashboard">
-                    <img src="{{ asset('images/ITK_1.png') }}" alt="Logo" class="w-20 mx-auto mb-2">
+                    <img src="{{ asset('images/ITK_1.png') }}" alt="Logo" class="w-16 mx-auto mb-2" />
                 </a>
-                <h1 class="text-xl font-bold text-primary">SIM -<span class="font-normal text-black">
-                        Pemeliharaan</span></h1>
+                <h1 class="text-xl font-bold text-primary">SIM <span class="font-normal text-black">Pemeliharaan</span>
+                </h1>
             </div>
 
-            <hr class="border-black">
+            <hr class="border-black" />
 
             <nav class="space-y-4 mt-4">
+                <!-- Daftar Keluhan -->
+                <a href="/sarpras-daftar-keluhan" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-blue-50 transition
+                    {{ request()->is('sarpras-daftar-keluhan') ? 'bg-blue-100 text-blue-700' : 'text-gray-700' }}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M9 12l2 2l4 -4" stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M5 13a9 9 0 1 1 14 0a9 9 0 1 1 -14 0" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <span>Daftar Keluhan</span>
+                </a>
+
+                <!-- Daftar Laporan -->
                 <a href="/daftar-permintaan-perbaikan"
-                    class="flex items-center text-gray-600 space-x-2 hover:text-blue-700">
-                    <span><img src="{{ asset('images/checklist.png') }}" class="w-5 h-5" alt="Daftar Permintaan"></span>
+                    class="flex items-center gap-2 px-3 py-2 rounded hover:bg-blue-50 transition
+                    {{ request()->is('daftar-permintaan-perbaikan') ? 'bg-blue-100 text-blue-700' : 'text-gray-700' }}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
                     <span>Daftar Laporan</span>
                 </a>
-                <a href="/riwayat-perbaikan" class="flex items-center space-x-2 text-gray-600 hover:text-blue-700">
-                    <span><img src="{{ asset('images/office-building.png') }}" class="w-5 h-5"
-                            alt="Riwayat Perbaikan"></span>
+
+                <!-- Riwayat Perbaikan -->
+                <a href="/riwayat-perbaikan" class="flex items-center gap-2 px-3 py-2 mb-4 rounded hover:bg-blue-50 transition
+                    {{ request()->is('riwayat-perbaikan') ? 'bg-blue-100 text-blue-700' : 'text-gray-700' }}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M3 3v6h6M21 21v-6h-6M3 21h6v-6H3v6zm12-6h6v6h-6v-6zM3 3h6v6H3V3zm12 0h6v6h-6V3z" />
+                    </svg>
                     <span>Riwayat Perbaikan</span>
                 </a>
-                <a href="/data-gedung" class="flex items-center space-x-2 text-gray-600 hover:text-blue-700">
-                    <span><img src="{{ asset('images/office-building.png') }}" class="w-5 h-5" alt="Data Gedung"></span>
-                    <span>Data Gedung</span>
-                </a>
-                <a href="/data-fasilitas-gedung" class="flex items-center space-x-2 text-gray-600 hover:text-blue-700">
-                    <span><img src="{{ asset('images/office-building.png') }}" class="w-5 h-5"
-                            alt="Fasilitas Gedung"></span>
-                    <span>Data Fasilitas Gedung</span>
-                </a>
-                <a href="/sarpras-data-ruang" class="flex items-center space-x-2 text-gray-600 hover:text-blue-700">
-                    <span><img src="{{ asset('images/office-building.png') }}" class="w-5 h-5"
-                            alt="Fasilitas Ruang"></span>
-                    <span>Data Ruang</span>
-                </a>
-                <a href="/data-fasilitas-ruang" class="flex items-center space-x-2 text-gray-600 hover:text-blue-700">
-                    <span><img src="{{ asset('images/office-building.png') }}" class="w-5 h-5"
-                            alt="Fasilitas Ruang"></span>
-                    <span>Data Fasilitas Ruang</span>
+
+                <!-- Dropdown Manajemen Gedung -->
+                <div class="space-y-2">
+                    <button @click="open = !open"
+                        class="w-full flex items-center justify-between px-3 py-2 rounded hover:bg-blue-50 transition text-gray-700 hover:text-blue-700 focus:outline-none">
+                        <div class="flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path d="M4 6h16M4 10h16M4 14h10" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                            <span>Manajemen Gedung</span>
+                        </div>
+                        <svg :class="{ 'rotate-180': open }" class="w-4 h-4 transform transition-transform duration-300"
+                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+
+                    <div x-show="open" x-transition class="pl-6 space-y-2" style="display: none;">
+                        <a href="/data-gedung" class="block px-3 py-2 rounded hover:bg-blue-50 transition
+                            {{ request()->is('data-gedung') ? 'bg-blue-100 text-blue-700' : 'text-gray-700' }}">
+                            Data Gedung
+                        </a>
+                        <a href="/sarpras-data-ruang" class="block px-3 py-2 rounded hover:bg-blue-50 transition
+                            {{ request()->is('sarpras-data-ruang') ? 'bg-blue-100 text-blue-700' : 'text-gray-700' }}">
+                            Data Ruang
+                        </a>
+                        <a href="/data-fasilitas-gedung"
+                            class="block px-3 py-2 rounded hover:bg-blue-50 transition
+                            {{ request()->is('data-fasilitas-gedung') ? 'bg-blue-100 text-blue-700' : 'text-gray-700' }}">
+                            Fasilitas Gedung
+                        </a>
+                        <a href="/data-fasilitas-ruang"
+                            class="block px-3 py-2 rounded hover:bg-blue-50 transition
+                            {{ request()->is('data-fasilitas-ruang') ? 'bg-blue-100 text-blue-700' : 'text-gray-700' }}">
+                            Fasilitas Ruang
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Data Teknisi -->
+                <a href="/sarpras-data-teknisi" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-blue-50 transition
+                    {{ request()->is('sarpras-data-teknisi') ? 'bg-blue-100 text-blue-700' : 'text-gray-700' }}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path
+                            d="M12 12c2.21 0 4 -1.79 4 -4s-1.79 -4 -4 -4 -4 1.79 -4 4 1.79 4 4 4zM4 20c0 -2.21 3.58 -4 8 -4s8 1.79 8 4v1H4v-1z" />
+                    </svg>
+                    <span>Data Teknisi</span>
                 </a>
 
                 <div class="mt-6 text-sm text-gray-500 font-bold">ACCOUNT PAGES</div>
-                <a href="/sarpras-profile" class="flex items-center space-x-2 text-gray-500">
-                    <span><img src="{{ asset('images/Vector.png') }}" class="w-5 h-5" alt="Profil"></span>
+
+                <!-- Profil -->
+                <a href="/sarpras-profile" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-blue-50 transition
+                    {{ request()->is('sarpras-profile') ? 'bg-blue-100 text-blue-700' : 'text-gray-700' }}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path
+                            d="M12 12c2.21 0 4 -1.79 4 -4s-1.79 -4 -4 -4 -4 1.79 -4 4 1.79 4 4 4zM4 20c0 -2.21 3.58 -4 8 -4s8 1.79 8 4v1H4v-1z" />
+                    </svg>
                     <span>Profil</span>
                 </a>
+
+                <!-- Keluar -->
                 <form action="{{ route('logout') }}" method="POST">
                     @csrf
-                    <button type="submit" class="flex items-center space-x-2 text-red-600 hover:text-red-800">
-                        <span><img src="{{ asset('images/Vector.png') }}"></span>
+                    <button type="submit"
+                        class="w-full flex items-center gap-2 px-3 py-2 rounded text-red-600 hover:bg-red-50 transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path d="M17 16l4-4m0 0l-4-4m4 4H7M3 12H7" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
                         <span>Keluar</span>
                     </button>
                 </form>
@@ -70,7 +154,7 @@
         </aside>
 
         <!-- Main content -->
-        <main class="flex-1 bg-gray-200">
+        <main class="flex-1 min-w-0 bg-gray-200">
             @include('layout.usertopLayout')
             <div class="p-6">
                 @yield('content')
@@ -78,50 +162,25 @@
         </main>
     </div>
 
-    <!-- Modal Pop-up -->
-    <div id="modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 hidden">
-        <div class="bg-white p-6 rounded-lg w-full max-w-md shadow-xl">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-semibold">Form Buat Laporan</h3>
-                <button id="closeModal" class="text-gray-600 hover:text-red-600 text-2xl leading-none">&times;</button>
-            </div>
-            <form>
-                <div class="mb-4">
-                    <label class="block mb-1 text-gray-600">Gedung</label>
-                    <select class="w-full border border-gray-300 p-2 rounded text-sm">
-                        <option selected disabled>Pilih Gedung</option>
-                        <option>Gedung A</option>
-                        <option>Gedung B</option>
-                    </select>
-                </div>
-                <div class="mb-4">
-                    <label class="block mb-1 text-gray-600">Indoor/Outdoor</label>
-                    <select class="w-full border border-gray-300 p-2 rounded text-sm">
-                        <option selected disabled>Pilih Tipe</option>
-                        <option>Indoor</option>
-                        <option>Outdoor</option>
-                    </select>
-                </div>
-                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-full">
-                    Kirim
-                </button>
-            </form>
-        </div>
-    </div>
-
     @yield('scripts')
 
     <script>
-    // Menampilkan Modal saat tombol "Membuat Laporan" di klik
-    document.getElementById('openModalButton')?.addEventListener('click', function() {
-        document.getElementById('modal').classList.remove('hidden');
-    });
+        const toggleBtn = document.getElementById('toggleSidebar');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
 
-    // Menutup Modal saat tombol close di klik
-    document.getElementById('closeModal')?.addEventListener('click', function() {
-        document.getElementById('modal').classList.add('hidden');
-    });
+        toggleBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        });
+
+        overlay.addEventListener('click', () => {
+            sidebar.classList.add('-translate-x-full');
+            overlay.classList.add('hidden');
+        });
     </script>
+
+    @stack('scripts')
 </body>
 
 </html>

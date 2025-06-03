@@ -1,49 +1,75 @@
 @extends('layout.sarprasLayout')
 
+<head>
+    <link rel="icon" href="{{ asset('images/ITK_1.png') }}" type="image/png" />
+    @section('title', 'Data Gedung')
+</head>
+
 @section('content')
-<div class="p-8">
-    <div class="bg-white rounded-md w-full py-10 px-10">
-        <div class="flex justify-between items-center mb-4">
+<style>
+    .sort-arrow {
+        font-size: 0.6rem;
+        user-select: none;
+        color: rgba(255, 255, 255, 0.6);
+        /* warna abu2 terang */
+        transition: color 0.3s ease;
+    }
+
+    .sort-arrow.active {
+        font-size: 0.8rem;
+        color: white;
+        /* warna utama saat aktif */
+    }
+</style>
+
+
+<div class="p-8 mt-20">
+    <div class="bg-white rounded-md w-full py-10 px-6 sm:px-10">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 space-y-4 sm:space-y-0">
             <h1 class="text-primary font-bold text-xl">Daftar Gedung</h1>
             <div>
                 <input id="search" type="text" placeholder="Cari fasilitas..."
-                    class="input input-bordered bg-white text-gray-600 placeholder-gray-600 border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary w-64 text-sm" />
+                    class="input input-bordered bg-white text-gray-600 placeholder-gray-600 border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary w-full sm:w-64 text-sm" />
             </div>
         </div>
-        <hr class="border-black mb-6">
-
+        <hr class="border-black mb-6" />
 
         <div class="space-y-6">
             <!-- Indoor and Outdoor Facilities with Flexbox -->
-            <div class="flex justify-between space-x-8">
+            <div class="flex flex-col sm:flex-row sm:space-x-8">
                 <!-- Indoor Facilities -->
-                <div class="w-full">
+                <div class="w-full overflow-x-auto">
+                    <table class="table w-full min-w-[600px] text-sm text-left text-gray-600 border"
+                        id="indoorFacilitiesTable">
+                        <thead class="bg-primary text-xs uppercase text-white">
+                            <tr>
+                                <th class="px-4 py-3 cursor-pointer" data-sortable="true" data-column="name">
+                                    Nama Fasilitas <span class="sort-arrow ml-1">▲▼</span>
+                                </th>
+                                <th class="px-4 py-3 cursor-pointer" data-sortable="true" data-column="description">
+                                    Deskripsi <span class="sort-arrow ml-1">▲▼</span>
+                                </th>
+                            </tr>
+                        </thead>
 
-                    <div class="overflow-x-auto">
-                        <table class="table w-full text-sm text-left text-gray-600 border" id="indoorFacilitiesTable">
-                            <thead class="bg-gray-100 text-xs uppercase text-gray-700">
-                                <tr>
-                                    <th class="px-6 py-3">Nama Fasilitas</th>
-                                    <th class="px-6 py-3">Deskripsi</th>
-                                    <th class="px-6 py-3">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($facilities as $facility)
-                                <tr class="facility-row" data-name="{{ $facility->building_name }}"
-                                    data-id="{{ $facility->id }}" data-description="{{ $facility->description }}">
-                                    <td class="px-6 py-3">{{ $facility->building_name }}</td>
-                                    <td class="px-6 py-3">{{ $facility->description }}</td>
-                                    <td class="px-6 py-3 relative">
-                                        <div class="relative inline-block text-left">
-                                            <button onclick="showFacilityDetails('{{ $facility->id }}')"
-                                                class="text-primary hover:underline">Lihat Laporan</button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                        <tbody>
+                            @foreach ($facilities as $facility)
+                            <tr class="facility-row hover:bg-gray-100 cursor-pointer" data-id="{{ $facility->id }}"
+                                data-name="{{ $facility->building_name }}"
+                                data-description="{{ $facility->description }}">
+                                <td class="px-4 py-3">{{ $facility->building_name }}</td>
+                                <td class="px-4 py-3">{{ $facility->description }}</td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+
+                    <div class="flex justify-end mt-2">
+                        <div class="join grid grid-cols-2 gap-2">
+                            <button id="prevPageBtn" class="join-item btn btn-outline bg-primary"
+                                disabled>Previous</button>
+                            <button id="nextPageBtn" class="join-item btn btn-outline bg-primary">Next</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -51,106 +77,194 @@
     </div>
 </div>
 
-{{-- Modal Detail Laporan --}}
-<div id="facilityDetailModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
-    <div class="bg-white p-6 rounded-lg w-[90%] md:w-2/3 relative">
-        <div class="flex justify-between items-center mb-4">
-            <h2 id="facilityDetailTitle" class="text-lg font-bold text-primary">Detail Laporan</h2>
-            <button onclick="closeModal('facilityDetailModal')"
-                class="text-gray-400 hover:text-gray-700 text-2xl font-bold">&times;</button>
+<!-- Modal Detail -->
+<div id="detailFacilityModal"
+    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50 p-4">
+    <div class="bg-white p-6 rounded-lg w-full max-w-lg sm:w-1/2">
+        <h2 class="text-lg text-primary font-bold mb-4">Detail Fasilitas</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-y-2 text-sm text-gray-700">
+            <div class="font-semibold">Nama</div>
+            <div class="sm:col-span-2" id="facilityName">:</div>
+            <div class="font-semibold">Deskripsi</div>
+            <div class="sm:col-span-2" id="facilityDescription">:</div>
         </div>
-
-        <div class="overflow-x-auto mb-4">
-            <table class="table w-full text-sm text-left text-gray-600 border">
-                <thead class="bg-gray-100 text-xs uppercase text-gray-700">
-                    <tr>
-                        <th class="px-6 py-3">Nomor Laporan</th>
-                        <th class="px-6 py-3">Pelapor</th>
-                        <th class="px-6 py-3">Teknisi</th>
-                        <th class="px-6 py-3">Foto</th>
-                        <th class="px-6 py-3">Status</th>
-                        <th class="px-6 py-3">Tanggal</th>
-                    </tr>
-                </thead>
-                <tbody id="facilityDetailContent">
-                    {{-- Konten laporan akan dimasukkan melalui JavaScript --}}
-                </tbody>
-            </table>
-        </div>
-
-        <div class="text-right">
-            <button onclick="closeModal('facilityDetailModal')"
-                class="px-4 py-2 bg-gray-400 text-white rounded hover:bg-gray-500">Tutup</button>
+        <div class="mt-6 flex justify-end">
+            <button onclick="closeModal('detailFacilityModal')"
+                class="bg-primary text-white px-4 py-2 rounded hover:bg-blue-700 text-sm">Tutup</button>
         </div>
     </div>
 </div>
 
+
+
 <script>
-// Dummy data laporan contoh
-const laporanData = {
-    "1": [ // ID gedung atau fasilitas
-        {
-            no: "L001",
-            pelapor: "Budi",
-            teknisi: "Andi",
-            foto: "https://via.placeholder.com/100", // Ganti URL jika perlu
-            status: "Selesai",
-            tanggal: "2025-05-10"
-        }
-    ],
-    "2": [{
-        no: "L002",
-        pelapor: "Siti",
-        teknisi: "Dika",
-        foto: "https://via.placeholder.com/100",
-        status: "Dalam Proses",
-        tanggal: "2025-05-11"
-    }]
-};
+    // Fungsi untuk mencari fasilitas berdasarkan nama atau deskripsi
+    document.getElementById('search').addEventListener('input', function() {
+        const searchQuery = this.value.toLowerCase();
+        const facilityRows = document.querySelectorAll('.facility-row');
 
-// Fungsi untuk mencari fasilitas berdasarkan nama atau deskripsi
-document.getElementById('search').addEventListener('input', function() {
-    const searchQuery = this.value.toLowerCase();
-    const facilityRows = document.querySelectorAll('.facility-row');
-
-    facilityRows.forEach(row => {
-        const name = row.getAttribute('data-name').toLowerCase();
-        const description = row.getAttribute('data-description').toLowerCase();
-        if (name.includes(searchQuery) || description.includes(searchQuery)) {
-            row.classList.remove('hidden');
-        } else {
-            row.classList.add('hidden');
-        }
-    });
-});
-
-// Render laporan detail ke dalam modal
-function showFacilityDetails(facilityId) {
-    const laporanForFacility = laporanData[facilityId] || [];
-    const modal = document.getElementById('facilityDetailModal');
-    const facilityDetailContent = document.getElementById('facilityDetailContent');
-
-    let detailContent = '';
-    laporanForFacility.forEach(laporan => {
-        detailContent += `
-            <tr>
-                <td class="px-6 py-3">${laporan.no}</td>
-                <td class="px-6 py-3">${laporan.pelapor}</td>
-                <td class="px-6 py-3">${laporan.teknisi}</td>
-                <td class="px-6 py-3"><img src="${laporan.foto}" alt="Foto Laporan" class="w-20 h-20 object-cover"></td>
-                <td class="px-6 py-3">${laporan.status}</td>
-                <td class="px-6 py-3">${laporan.tanggal}</td>
-            </tr>
-        `;
+        facilityRows.forEach(row => {
+            const name = row.getAttribute('data-name').toLowerCase();
+            const description = row.getAttribute('data-description').toLowerCase();
+            if (name.includes(searchQuery) || description.includes(searchQuery)) {
+                row.classList.remove('hidden');
+            } else {
+                row.classList.add('hidden');
+            }
+        });
     });
 
-    facilityDetailContent.innerHTML = detailContent;
-    modal.classList.remove('hidden');
-}
+    // Render laporan detail ke dalam modal
+    function showFacilityDetails(button) {
+        const row = button.closest('tr');
+        document.getElementById('facilityName').textContent = row.dataset.name;
+        document.getElementById('facilityDescription').textContent = row.dataset.description;
+        openModal('detailFacilityModal');
+    }
 
-function closeModal(modalId) {
-    document.getElementById(modalId).classList.add('hidden');
-}
+    document.querySelectorAll('.facility-row').forEach(row => {
+        row.addEventListener('click', function() {
+            const name = this.dataset.name;
+            const description = this.dataset.description;
+
+            document.getElementById('facilityName').textContent = name;
+            document.getElementById('facilityDescription').textContent = description;
+
+            openModal('detailFacilityModal');
+        });
+    });
+
+    // Event klik baris untuk lihat detail fasilitas
+    document.querySelectorAll('.facility-row').forEach(row => {
+        row.addEventListener('click', function() {
+            const name = this.dataset.name;
+            const description = this.dataset.description;
+
+            document.getElementById('facilityName').textContent = name;
+            document.getElementById('facilityDescription').textContent = description;
+
+            openModal('detailFacilityModal');
+        });
+    });
+
+    // Fungsi sorting tabel berdasarkan kolom dan update tanda panah
+    function sortTable(tableId, column, asc = true) {
+        const table = document.getElementById(tableId);
+        const tbody = table.querySelector('tbody');
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+
+        rows.sort((a, b) => {
+            const aText = a.querySelector(`td:nth-child(${column + 1})`).textContent.trim().toLowerCase();
+            const bText = b.querySelector(`td:nth-child(${column + 1})`).textContent.trim().toLowerCase();
+
+            if (aText < bText) return asc ? -1 : 1;
+            if (aText > bText) return asc ? 1 : -1;
+            return 0;
+        });
+
+        tbody.innerHTML = '';
+        rows.forEach(row => tbody.appendChild(row));
+
+        const headers = table.querySelectorAll('thead th[data-sortable="true"]');
+        headers.forEach((header, idx) => {
+            const arrowSpan = header.querySelector('.sort-arrow');
+            if (idx === column) {
+                arrowSpan.textContent = asc ? '▲' : '▼';
+                arrowSpan.classList.add('active');
+            } else {
+                arrowSpan.textContent = '▲▼';
+                arrowSpan.classList.remove('active');
+            }
+        });
+    }
+
+    let sortDirections = {
+        name: true,
+        description: true
+    };
+
+    document.querySelectorAll('#indoorFacilitiesTable thead th[data-sortable="true"]').forEach((header, index) => {
+        header.addEventListener('click', () => {
+            const columnName = header.getAttribute('data-column');
+            const asc = sortDirections[columnName];
+            sortTable('indoorFacilitiesTable', index, asc);
+            sortDirections[columnName] = !asc;
+        });
+    });
+
+
+
+    function openModal(id) {
+        document.getElementById(id).classList.remove('hidden');
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).classList.add('hidden');
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).classList.add('hidden');
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('search');
+        const table = document.getElementById('indoorFacilitiesTable');
+        const tbody = table.querySelector('tbody');
+        const allRows = Array.from(tbody.querySelectorAll('tr.facility-row'));
+
+        const prevBtn = document.getElementById('prevPageBtn');
+        const nextBtn = document.getElementById('nextPageBtn');
+        const pageIndicator = document.getElementById('pageIndicator');
+
+        let currentPage = 1;
+        const rowsPerPage = 10;
+
+        function getFilteredRows() {
+            const query = searchInput.value.toLowerCase();
+            return allRows.filter(row => {
+                const name = row.getAttribute('data-name').toLowerCase();
+                const desc = row.getAttribute('data-description').toLowerCase();
+                return name.includes(query) || desc.includes(query);
+            });
+        }
+
+        function renderTable() {
+            const filtered = getFilteredRows();
+            const totalPages = Math.ceil(filtered.length / rowsPerPage);
+
+            if (currentPage > totalPages) currentPage = totalPages;
+            if (currentPage < 1) currentPage = 1;
+
+            const start = (currentPage - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+
+            tbody.innerHTML = '';
+            filtered.slice(start, end).forEach(row => tbody.appendChild(row));
+
+            // Pagination UI
+            prevBtn.disabled = currentPage === 1;
+            nextBtn.disabled = currentPage === totalPages || totalPages === 0;
+            pageIndicator.textContent = `Page ${totalPages === 0 ? 0 : currentPage} of ${totalPages}`;
+        }
+
+        // Event listeners
+        searchInput.addEventListener('input', () => {
+            currentPage = 1;
+            renderTable();
+        });
+
+        prevBtn.addEventListener('click', () => {
+            currentPage--;
+            renderTable();
+        });
+
+        nextBtn.addEventListener('click', () => {
+            currentPage++;
+            renderTable();
+        });
+
+        renderTable(); // Initial render
+    });
 </script>
 
 @endsection

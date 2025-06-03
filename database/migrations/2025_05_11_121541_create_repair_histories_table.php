@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('id_report');
             $table->dateTime('complete_date');
-            $table->text('repair_notes');
-            $table->string('damage_photo');
+            $table->text('repair_notes')->nullable(); // tambahkan nullable()
+            $table->string('damage_photo')->nullable();
             $table->timestamps();
         });
     }

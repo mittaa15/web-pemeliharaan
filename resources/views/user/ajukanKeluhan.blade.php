@@ -1,5 +1,10 @@
 @extends('layout.userLayout')
 
+<head>
+    <link rel="icon" href="{{ asset('images/ITK_1.png') }}" type="image/png" />
+    @section('title', 'Pengajuan Keluhan')
+</head>
+
 @section('content')
 <div class="p-8">
     <div class="bg-white rounded-md w-full py-10 px-10">
