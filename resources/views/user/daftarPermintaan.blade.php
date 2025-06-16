@@ -20,7 +20,7 @@ default: return 'bg-gray-100 text-gray-800';
 
 
 @section('content')
-<div class="mt-20 px-4 sm:px-8 py-6 w-full overflow-x-auto"
+<div class="px-4 sm:px-8 py-6 w-full overflow-x-auto"
     style="touch-action: pan-x pan-y; -webkit-overflow-scrolling: touch;">
     @if(session('success'))
     <div id="success-alert" class="bg-green-100 text-green-800 flex justify-center p-2 mb-4 rounded">
@@ -605,16 +605,20 @@ default: return 'bg-gray-100 text-gray-800';
 
         // Isi tabel detail
         const detailContent = document.getElementById('detailContent');
+        // Ambil foto perbaikan dari history terakhir jika ada
+        // Ambil history dengan status "Pengecekan akhir"
+        const pengecekanAkhirHistory = laporan.histories?.find(
+            (item) => item.status === "Pengecekan akhir"
+        );
+
+        // Ambil foto perbaikan jika ada di status "Pengecekan akhir"
+        const repairPhoto = pengecekanAkhirHistory?.damage_photo ?
+            `<img src="/storage/${pengecekanAkhirHistory.damage_photo}" alt="Foto Perbaikan" class="max-w-xs max-h-48 rounded border border-gray-300 bukti-preview cursor-pointer" />` :
+            '-';
+
         detailContent.innerHTML = `
         <tr><td class="px-6 py-3 font-semibold">Nomor Pengajuan</td><td class="px-6 py-3">${String(laporan.id).padStart(4, '0')}</td></tr>
-        <tr>
-            <td class="px-6 py-3 font-semibold">Status Laporan Terkini</td>
-            <td class="px-6 py-3">
-                <span class="text-xs font-semibold inline-block px-2 py-1 rounded ${getStatusLabelClass(laporan.status)}">
-                    ${laporan.status}
-                </span>
-            </td>
-        </tr>
+        <tr><td class="px-6 py-3 font-semibold">Status Laporan Terkini</td><td class="px-6 py-3"><span class="text-xs font-semibold inline-block px-2 py-1 rounded ${getStatusLabelClass(laporan.status)}">${laporan.status}</span></td></tr>
         <tr><td class="px-6 py-3 font-semibold">Tanggal Diajukan</td><td class="px-6 py-3">${formatDateUTC(laporan.created_at)}</td></tr>
         <tr><td class="px-6 py-3 font-semibold">Gedung</td><td class="px-6 py-3">${laporan.building?.building_name ?? '-'}</td></tr>
         <tr><td class="px-6 py-3 font-semibold">Ruangan</td><td class="px-6 py-3">${laporan.room?.room_name ?? '-'}</td></tr>
@@ -623,6 +627,7 @@ default: return 'bg-gray-100 text-gray-800';
         <tr><td class="px-6 py-3 font-semibold">Deskripsi Kerusakan</td><td class="px-6 py-3">${laporan.damage_description}</td></tr>
         <tr><td class="px-6 py-3 font-semibold">Dampak Kerusakan</td><td class="px-6 py-3">${laporan.damage_impact}</td></tr>
         <tr><td class="px-6 py-3 font-semibold">Bukti Kerusakan</td><td class="px-6 py-3">${laporan.damage_photo? `<img src="/storage/${laporan.damage_photo}" alt="Bukti Kerusakan" class="max-w-xs max-h-48 rounded border border-gray-300 bukti-preview cursor-pointer" />` : '-'}</td></tr>
+        <tr><td class="px-6 py-3 font-semibold">Foto Perbaikan</td><td class="px-6 py-3">${repairPhoto}</td></tr>
         <tr><td class="px-6 py-3 font-semibold">Riwayat Perbaikan Terakhir</td><td class="px-6 py-3">${riwayatHtml}</td></tr>
         <tr><td class="px-6 py-3 font-semibold">Nama Teknisi</td><td class="px-6 py-3">${laporan.schedules?.technician_name ?? '-'}</td></tr>
         <tr><td class="px-6 py-3 font-semibold">Tanggal Perbaikan</td><td class="px-6 py-3">${laporan.schedules?.repair_date ?? '-'}</td></tr>

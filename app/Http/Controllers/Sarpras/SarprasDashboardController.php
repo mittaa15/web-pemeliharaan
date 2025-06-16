@@ -49,19 +49,8 @@ class SarprasDashboardController extends Controller
 
     public function daftarPermintaanPerbaikanView(Request $request)
     {
-        // Ambil laporan yang statusnya 'Diproses'
-        $diprosesReports = RepairReport::with([
-            'room',
-            'roomFacility',
-            'building',
-            'buildingFacility',
-            'latestHistory',
-            'schedules',
-            'user',
-        ])->where('status', 'Diproses')->get();
-
-        // Ambil laporan selain status tertentu dan lakukan grouping
-        $otherReportsRaw = RepairReport::with([
+        // Ambil semua laporan yang statusnya bukan 'Selesai', 'Ditolak', atau 'Dibatalkan'
+        $allReports = RepairReport::with([
             'room',
             'roomFacility',
             'building',
@@ -70,32 +59,20 @@ class SarprasDashboardController extends Controller
             'schedules',
             'user',
         ])
-            ->whereNotIn('status', ['Diproses', 'Selesai', 'Ditolak', 'Dibatalkan'])
+            ->whereNotIn('status', ['Selesai', 'Ditolak', 'Dibatalkan'])
             ->get();
 
-        // Grouping berdasarkan kombinasi ID
-        $grouped = $otherReportsRaw->groupBy(function ($item) {
-            return implode('-', [
-                $item->id_room,
-                $item->id_facility_room,
-                $item->id_building,
-                $item->id_facility_building,
-            ]);
-        });
+        // Pisahkan yang 'Diproses' dan yang lainnya
+        $diprosesReports = $allReports->filter(function ($report) {
+            return $report->status === 'Diproses';
+        })->sortByDesc('damage_point');
 
-        $groupedOtherReports = collect();
-        foreach ($grouped as $group) {
-            $groupedOtherReports->push($group->first());
-        }
+        $otherReports = $allReports->filter(function ($report) {
+            return $report->status !== 'Diproses';
+        })->sortByDesc('damage_point');
 
-        // Gabungkan kedua hasil
-        $RepairReports = $diprosesReports->merge($groupedOtherReports);
-
-        // Urutkan berdasarkan damage_point DESC, lalu created_at ASC
-        $RepairReports = $RepairReports->sortBy([
-            ['damage_point', 'desc'],
-            ['created_at', 'asc'],
-        ])->values(); // reset index
+        // Gabungkan kembali: 'Diproses' di atas, sisanya di bawah
+        $RepairReports = $diprosesReports->concat($otherReports)->values();
 
         // Ambil teknisi & notifikasi
         $TeknisiLists = Technician::all();
@@ -106,7 +83,6 @@ class SarprasDashboardController extends Controller
             ->take(10)
             ->get();
 
-
         return view('sarpras.daftarPermintaanPerbaikan', compact(
             'RepairReports',
             'TeknisiLists',
@@ -114,6 +90,7 @@ class SarprasDashboardController extends Controller
             'notifications'
         ));
     }
+
 
     public function sarprasProfileView()
     {
@@ -128,7 +105,8 @@ class SarprasDashboardController extends Controller
             'building',
             'buildingFacility',
             'histories',
-            'schedules'
+            'schedules',
+            'technicians'
         ])->whereIn('status', ['Selesai', 'Ditolak'])->orderBy('created_at', 'desc')->get();
 
         return view('sarpras.riwayatPerbaikan', compact('RepairReports'));
@@ -145,21 +123,13 @@ class SarprasDashboardController extends Controller
     {
         $buildings = Building::orderBy('building_name', 'asc')->get(); // ini juga diurutkan
 
-        $indoorFacilities = BuildingFacility::with('building:id,building_name')
-            ->where('location', 'indoor')
+        $facilities = BuildingFacility::with('building:id,building_name')
             ->get()
             ->sortBy(function ($item) {
                 return $item->building->building_name;
             });
 
-        $outdoorFacilities = BuildingFacility::with('building:id,building_name')
-            ->where('location', 'outdoor')
-            ->get()
-            ->sortBy(function ($item) {
-                return $item->building->building_name;
-            });
-
-        return view('sarpras.dataFasilitasGedung', compact('buildings', 'indoorFacilities', 'outdoorFacilities'));
+        return view('sarpras.dataFasilitasGedung', compact('buildings', 'facilities'));
     }
 
     public function sarprasDataRuangView()

@@ -6,7 +6,7 @@
 </head>
 
 @section('content')
-<div class="p-4 sm:p-6 md:p-8 mt-20">
+<div class="p-4 sm:p-6 md:p-8">
     <div class="bg-white rounded-md w-full py-6 px-4 sm:px-6 md:px-10">
         <h1 class="text-primary font-bold text-xl mb-4">Data Teknisi</h1>
         <hr class="border-black mb-6">

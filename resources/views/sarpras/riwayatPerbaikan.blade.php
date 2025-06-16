@@ -6,7 +6,7 @@
 </head>
 
 @section('content')
-<div class="p-8 mt-20">
+<div class="p-8">
     <div class="bg-white rounded-md w-full py-10 px-10">
         <h1 class="text-primary font-bold text-xl mb-4">Riwayat Perbaikan</h1>
         <hr class="border-black mb-6">
@@ -30,7 +30,7 @@
                 <thead class="text-xs text-white uppercase bg-primary">
                     <tr>
                         <th class="px-6 py-3">No</th>
-                        <th class="px-6 py-3">Nomor Pengajuan</th>
+                        <th class="px-6 py-3">Gedung</th>
                         <th class="px-6 py-3">Lokasi</th>
                         <th class="px-6 py-3">Status</th>
                         <th class="px-6 py-3">Waktu</th>
@@ -40,8 +40,8 @@
                     @foreach($RepairReports as $index => $report)
                     <tr class="cursor-pointer hover:bg-gray-100" onclick="showDetail('{{ $report->id }}')">
                         <td class="px-6 py-3">{{ $index + 1 }}</td>
-                        <td class="px-6 py-3">{{ str_pad($report->id, 4, '0', STR_PAD_LEFT) }}</td>
                         <td class="px-6 py-3">{{ $report->building->building_name ?? '-' }}</td>
+                        <td class="px-6 py-3">{{ $report->location_type}}</td>
                         <td class="px-6 py-3">
                             <span class="status-cell text-xs font-semibold px-2.5 py-0.5 rounded"
                                 data-status="{{ $report->status }}">{{ $report->status }}</span>
@@ -119,98 +119,98 @@
 </div>
 
 <script>
-    const repairReports = @json($RepairReports);
-    console.log(repairReports);
+const repairReports = @json($RepairReports);
+console.log(repairReports);
 
-    function closeModal() {
-        document.getElementById('detailModal').classList.add('hidden');
+function closeModal() {
+    document.getElementById('detailModal').classList.add('hidden');
+}
+
+function closeRiwayatModal() {
+    document.getElementById('riwayatModal').classList.add('hidden');
+}
+
+function getStatusLabelClass(status) {
+    switch (status.toLowerCase()) {
+        case 'diproses':
+            return 'bg-blue-100 text-blue-800';
+        case 'ditolak':
+            return 'bg-red-100 text-red-800';
+        case 'dijadwalkan':
+            return 'bg-indigo-100 text-indigo-800';
+        case 'dalam proses pengerjaan':
+            return 'bg-yellow-100 text-yellow-800';
+        case 'pengecekan akhir':
+            return 'bg-purple-100 text-purple-800';
+        case 'selesai':
+            return 'bg-green-100 text-green-800'
+        default:
+            return 'bg-gray-100 text-gray-800';
     }
+}
+document.addEventListener('DOMContentLoaded', () => {
+    const statusCells = document.querySelectorAll('.status-cell');
 
-    function closeRiwayatModal() {
-        document.getElementById('riwayatModal').classList.add('hidden');
-    }
-
-    function getStatusLabelClass(status) {
-        switch (status.toLowerCase()) {
-            case 'diproses':
-                return 'bg-blue-100 text-blue-800';
-            case 'ditolak':
-                return 'bg-red-100 text-red-800';
-            case 'dijadwalkan':
-                return 'bg-indigo-100 text-indigo-800';
-            case 'dalam proses pengerjaan':
-                return 'bg-yellow-100 text-yellow-800';
-            case 'pengecekan akhir':
-                return 'bg-purple-100 text-purple-800';
-            case 'selesai':
-                return 'bg-green-100 text-green-800'
-            default:
-                return 'bg-gray-100 text-gray-800';
-        }
-    }
-    document.addEventListener('DOMContentLoaded', () => {
-        const statusCells = document.querySelectorAll('.status-cell');
-
-        statusCells.forEach(cell => {
-            const status = cell.getAttribute('data-status');
-            const classes = getStatusLabelClass(status);
-            cell.classList.add(...classes.split(' '));
-        });
+    statusCells.forEach(cell => {
+        const status = cell.getAttribute('data-status');
+        const classes = getStatusLabelClass(status);
+        cell.classList.add(...classes.split(' '));
     });
+});
 
-    function showDetail(reportId) {
-        const riwayatBtn = document.getElementById('btnRiwayat');
-        riwayatBtn.setAttribute('onclick', `showRiwayat(${reportId})`);
-        const laporan = repairReports.find(r => r.id === parseInt(reportId));
-        if (!laporan) return;
+function showDetail(reportId) {
+    const riwayatBtn = document.getElementById('btnRiwayat');
+    riwayatBtn.setAttribute('onclick', `showRiwayat(${reportId})`);
+    const laporan = repairReports.find(r => r.id === parseInt(reportId));
+    if (!laporan) return;
 
 
-        const createdAt = new Date(laporan.created_at);
-        let lastStatusDate = createdAt; // default ke tanggal pengajuan
+    const createdAt = new Date(laporan.created_at);
+    let lastStatusDate = createdAt; // default ke tanggal pengajuan
 
-        if (laporan.histories && laporan.histories.length > 0) {
-            const lastHistory = laporan.histories[laporan.histories.length - 1];
-            if (lastHistory.complete_date) {
-                lastStatusDate = new Date(lastHistory.complete_date);
-            }
+    if (laporan.histories && laporan.histories.length > 0) {
+        const lastHistory = laporan.histories[laporan.histories.length - 1];
+        if (lastHistory.complete_date) {
+            lastStatusDate = new Date(lastHistory.complete_date);
         }
+    }
 
-        const now = new Date();
-        const diffTime = now - lastStatusDate;
-        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    const now = new Date();
+    const diffTime = now - lastStatusDate;
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
-        if (diffDays > 3 && laporan.status.toLowerCase() !== 'selesai') {
-            keluhanBtn.classList.remove('hidden');
-            keluhanBtn.onclick = () => {
-                window.location.href = `/user/form-keluhan/${laporan.id}`; // arahkan ke form keluhan
-            };
-        }
+    if (diffDays > 3 && laporan.status.toLowerCase() !== 'selesai') {
+        keluhanBtn.classList.remove('hidden');
+        keluhanBtn.onclick = () => {
+            window.location.href = `/user/form-keluhan/${laporan.id}`; // arahkan ke form keluhan
+        };
+    }
 
 
-        // Fungsi format tanggal (bisa kamu pindahkan keluar supaya reusable)
-        function formatDateUTC(dateString) {
-            if (!dateString) return '-';
+    // Fungsi format tanggal (bisa kamu pindahkan keluar supaya reusable)
+    function formatDateUTC(dateString) {
+        if (!dateString) return '-';
 
-            const date = new Date(dateString);
-            if (isNaN(date)) return dateString;
+        const date = new Date(dateString);
+        if (isNaN(date)) return dateString;
 
-            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-            const day = String(date.getUTCDate()).padStart(2, '0');
-            const month = months[date.getUTCMonth()];
-            const year = date.getUTCFullYear();
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const day = String(date.getUTCDate()).padStart(2, '0');
+        const month = months[date.getUTCMonth()];
+        const year = date.getUTCFullYear();
 
-            return `${day} ${month} ${year}`;
-        }
+        return `${day} ${month} ${year}`;
+    }
 
-        // Ambil status laporan terbaru
-        const status = laporan.status.toLowerCase();
+    // Ambil status laporan terbaru
+    const status = laporan.status.toLowerCase();
 
-        // Buat isi detail seperti sebelumnya
-        let riwayatHtml = '';
-        if (laporan.histories && laporan.histories.length > 0) {
-            const lastHistory = laporan.histories[laporan.histories.length - 1];
-            const statusClass = getStatusLabelClass(lastHistory.status);
-            riwayatHtml = `
+    // Buat isi detail seperti sebelumnya
+    let riwayatHtml = '';
+    if (laporan.histories && laporan.histories.length > 0) {
+        const lastHistory = laporan.histories[laporan.histories.length - 1];
+        const statusClass = getStatusLabelClass(lastHistory.status);
+        riwayatHtml = `
             <div>
                 <strong>Status:</strong> 
                 <span class="px-2 mb-2 text-sm font-semibold rounded ${statusClass}">
@@ -220,73 +220,64 @@
                 <strong>Catatan:</strong> ${lastHistory.repair_notes ?? '-'}<br>
             </div>
         `;
-        } else {
-            riwayatHtml = 'Tidak ada riwayat perbaikan.';
-        }
+    } else {
+        riwayatHtml = 'Tidak ada riwayat perbaikan.';
+    }
 
-        // Isi tabel detail
-        const detailContent = document.getElementById('detailContent');
-        detailContent.innerHTML = `
+    // Isi tabel detail
+    const detailContent = document.getElementById('detailContent');
+
+    // Cari data history dengan status "Pengecekan akhir"
+    const pengecekanAkhirHistory = laporan.histories?.find(
+        (item) => item.status === "Pengecekan akhir"
+    );
+
+    // Ambil foto perbaikan jika ada
+    const repairPhoto = pengecekanAkhirHistory?.damage_photo ?
+        `<img src="/storage/${pengecekanAkhirHistory.damage_photo}" alt="Foto Perbaikan" class="max-w-xs max-h-48 rounded border border-gray-300 bukti-preview cursor-pointer" onclick="openImagePreview('/storage/${pengecekanAkhirHistory.damage_photo}')" />` :
+        '-';
+
+    detailContent.innerHTML = `
         <tr><td class="px-6 py-3 font-semibold">Nomor Pengajuan</td><td class="px-6 py-3">${String(laporan.id).padStart(4, '0')}</td></tr>
-        <tr>
-            <td class="px-6 py-3 font-semibold">Status Laporan Terkini</td>
-            <td class="px-6 py-3">
-                <span class="text-xs font-semibold inline-block px-2 py-1 rounded ${getStatusLabelClass(laporan.status)}">
-                    ${laporan.status}
-                </span>
-            </td>
-        </tr>
+        <tr><td class="px-6 py-3 font-semibold">Status Laporan Terkini</td><td class="px-6 py-3"><span class="text-xs font-semibold inline-block px-2 py-1 rounded ${getStatusLabelClass(laporan.status)}">${laporan.status}</span></td></tr>
         <tr><td class="px-6 py-3 font-semibold">Tanggal Diajukan</td><td class="px-6 py-3">${formatDateUTC(laporan.created_at)}</td></tr>
         <tr><td class="px-6 py-3 font-semibold">Gedung</td><td class="px-6 py-3">${laporan.building?.building_name ?? '-'}</td></tr>
         <tr><td class="px-6 py-3 font-semibold">Ruangan</td><td class="px-6 py-3">${laporan.room?.room_name ?? '-'}</td></tr>
         <tr><td class="px-6 py-3 font-semibold">Fasilitas Gedung</td><td class="px-6 py-3">${laporan.building_facility?.facility_name ?? '-'}</td></tr>
         <tr><td class="px-6 py-3 font-semibold">Fasilitas Ruangan</td><td class="px-6 py-3">${laporan.room_facility?.facility_name ?? '-'}</td></tr>
         <tr><td class="px-6 py-3 font-semibold">Deskripsi Kerusakan</td><td class="px-6 py-3">${laporan.damage_description}</td></tr>
-         <tr><td class="px-6 py-3 font-semibold">Dampak Kerusakan</td><td class="px-6 py-3">${laporan.damage_impact}</td></tr>
-<tr>
-    <td class="px-6 py-3 font-semibold">Bukti Kerusakan</td>
-    <td class="px-6 py-3">
-        ${
-          laporan.damage_photo
-            ? `<img 
-                 src="/storage/${laporan.damage_photo}" 
-                 alt="Bukti Kerusakan" 
-                 class="max-w-xs max-h-48 rounded border border-gray-300 bukti-preview cursor-pointer" 
-                 onclick="openImagePreview('/storage/${laporan.damage_photo}')" 
-               />`
-            : '-'
-        }
-    </td>
-</tr>   
+        <tr><td class="px-6 py-3 font-semibold">Dampak Kerusakan</td><td class="px-6 py-3">${laporan.damage_impact}</td></tr>
+        <tr><td class="px-6 py-3 font-semibold">Bukti Kerusakan</td><td class="px-6 py-3">${laporan.damage_photo? `<img src="/storage/${laporan.damage_photo}" alt="Bukti Kerusakan" class="max-w-xs max-h-48 rounded border border-gray-300 bukti-preview cursor-pointer" onclick="openImagePreview('/storage/${laporan.damage_photo}')" />`: '-'}</td></tr>   
+        <tr><td class="px-6 py-3 font-semibold">Foto Perbaikan</td><td class="px-6 py-3">${repairPhoto}</td></tr>
         <tr><td class="px-6 py-3 font-semibold">Riwayat Perbaikan Terakhir</td><td class="px-6 py-3">${riwayatHtml}</td></tr>
-        <tr><td class="px-6 py-3 font-semibold">Nama Teknisi</td><td class="px-6 py-3">${laporan.schedules?.technician_name ?? '-'}</td></tr>
+        <tr><td class="px-6 py-3 font-semibold">Nama Teknisi</td><td class="px-6 py-3">${laporan.technicians?.length? laporan.technicians.map(t => t.name).join(', '): '-'}</td></tr>
         <tr><td class="px-6 py-3 font-semibold">Tanggal Perbaikan</td><td class="px-6 py-3">${laporan.schedules?.repair_date ?? '-'}</td></tr>
     `;
 
 
-        document.getElementById('detailModal').classList.remove('hidden');
-    }
+    document.getElementById('detailModal').classList.remove('hidden');
+}
 
-    function showRiwayat(reportId) {
-        const laporan = repairReports.find(r => r.id === parseInt(reportId));
-        if (!laporan) return alert('Data laporan tidak ditemukan');
+function showRiwayat(reportId) {
+    const laporan = repairReports.find(r => r.id === parseInt(reportId));
+    if (!laporan) return alert('Data laporan tidak ditemukan');
 
-        console.log(reportId)
+    console.log(reportId)
 
-        const histories = laporan.histories || [];
+    const histories = laporan.histories || [];
 
-        // Urutkan histories dari tanggal terbaru
-        const sortedHistories = [...histories].sort((a, b) => {
-            const dateA = new Date(a.complete_date);
-            const dateB = new Date(b.complete_date);
-            return dateB - dateA; // descending
-        });
+    // Urutkan histories dari tanggal terbaru
+    const sortedHistories = [...histories].sort((a, b) => {
+        const dateA = new Date(a.complete_date);
+        const dateB = new Date(b.complete_date);
+        return dateB - dateA; // descending
+    });
 
-        // Siapkan HTML riwayat
-        let riwayatHtml = '';
-        if (sortedHistories.length > 0) {
-            sortedHistories.forEach(history => {
-                riwayatHtml += `
+    // Siapkan HTML riwayat
+    let riwayatHtml = '';
+    if (sortedHistories.length > 0) {
+        sortedHistories.forEach(history => {
+            riwayatHtml += `
                 <tr class="border-b">
                     <td class="px-6 py-3">
                         <span class="px-2 py-1 text-sm font-semibold rounded ${getStatusLabelClass(history.status)}">
@@ -297,101 +288,101 @@
                     <td class="px-6 py-3">${history.repair_notes || '-'}</td>
                 </tr>
             `;
-            });
-        } else {
-            riwayatHtml = `
+        });
+    } else {
+        riwayatHtml = `
             <tr>
                 <td colspan="4" class="text-center py-4 text-gray-500">Tidak ada riwayat perbaikan.</td>
             </tr>
         `;
-        }
-
-        const riwayatModalContent = document.getElementById('historyContent');
-        riwayatModalContent.innerHTML = riwayatHtml;
-
-        document.getElementById('riwayatModal').classList.remove('hidden');
     }
 
-    function openImagePreview(imageUrl) {
-        const modal = document.getElementById('imagePreviewModal');
-        const img = document.getElementById('previewImage');
-        img.src = imageUrl;
-        modal.classList.remove('hidden');
+    const riwayatModalContent = document.getElementById('historyContent');
+    riwayatModalContent.innerHTML = riwayatHtml;
+
+    document.getElementById('riwayatModal').classList.remove('hidden');
+}
+
+function openImagePreview(imageUrl) {
+    const modal = document.getElementById('imagePreviewModal');
+    const img = document.getElementById('previewImage');
+    img.src = imageUrl;
+    modal.classList.remove('hidden');
+}
+
+function closeImagePreview() {
+    const modal = document.getElementById('imagePreviewModal');
+    modal.classList.add('hidden');
+    const img = document.getElementById('previewImage');
+    img.src = ''; // clear src supaya tidak berat
+}
+
+// Show entries dan Cari Laporan
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('search');
+    const entriesInput = document.getElementById('entries');
+    const tableBody = document.getElementById('historyTableBody');
+    const rows = Array.from(tableBody.querySelectorAll('tr'));
+
+    const prevBtn = document.getElementById('prevPageBtn');
+    const nextBtn = document.getElementById('nextPageBtn');
+    const pageIndicator = document.getElementById('pageIndicator');
+
+    let currentPage = 1;
+
+    function getFilteredRows() {
+        const searchTerm = searchInput.value.toLowerCase();
+        return rows.filter(row => row.textContent.toLowerCase().includes(searchTerm));
     }
 
-    function closeImagePreview() {
-        const modal = document.getElementById('imagePreviewModal');
-        modal.classList.add('hidden');
-        const img = document.getElementById('previewImage');
-        img.src = ''; // clear src supaya tidak berat
+    function renderTable() {
+        const entries = parseInt(entriesInput.value) || 10;
+        const filtered = getFilteredRows();
+        const totalPages = Math.ceil(filtered.length / entries);
+
+        // Pastikan currentPage tetap valid
+        if (currentPage > totalPages) currentPage = totalPages;
+        if (currentPage < 1) currentPage = 1;
+
+        const start = (currentPage - 1) * entries;
+        const end = start + entries;
+
+        tableBody.innerHTML = '';
+
+        filtered.slice(start, end).forEach(row => {
+            tableBody.appendChild(row);
+        });
+
+        // Update pagination UI
+        prevBtn.disabled = currentPage === 1;
+        nextBtn.disabled = currentPage === totalPages || totalPages === 0;
+        pageIndicator.textContent = `Page ${totalPages === 0 ? 0 : currentPage} of ${totalPages}`;
     }
 
-    // Show entries dan Cari Laporan
-    document.addEventListener('DOMContentLoaded', function() {
-        const searchInput = document.getElementById('search');
-        const entriesInput = document.getElementById('entries');
-        const tableBody = document.getElementById('historyTableBody');
-        const rows = Array.from(tableBody.querySelectorAll('tr'));
-
-        const prevBtn = document.getElementById('prevPageBtn');
-        const nextBtn = document.getElementById('nextPageBtn');
-        const pageIndicator = document.getElementById('pageIndicator');
-
-        let currentPage = 1;
-
-        function getFilteredRows() {
-            const searchTerm = searchInput.value.toLowerCase();
-            return rows.filter(row => row.textContent.toLowerCase().includes(searchTerm));
-        }
-
-        function renderTable() {
-            const entries = parseInt(entriesInput.value) || 10;
-            const filtered = getFilteredRows();
-            const totalPages = Math.ceil(filtered.length / entries);
-
-            // Pastikan currentPage tetap valid
-            if (currentPage > totalPages) currentPage = totalPages;
-            if (currentPage < 1) currentPage = 1;
-
-            const start = (currentPage - 1) * entries;
-            const end = start + entries;
-
-            tableBody.innerHTML = '';
-
-            filtered.slice(start, end).forEach(row => {
-                tableBody.appendChild(row);
-            });
-
-            // Update pagination UI
-            prevBtn.disabled = currentPage === 1;
-            nextBtn.disabled = currentPage === totalPages || totalPages === 0;
-            pageIndicator.textContent = `Page ${totalPages === 0 ? 0 : currentPage} of ${totalPages}`;
-        }
-
-        // Event binding
-        searchInput.addEventListener('input', () => {
-            currentPage = 1;
-            renderTable();
-        });
-
-        entriesInput.addEventListener('input', () => {
-            if (entriesInput.value < 1) entriesInput.value = 1;
-            currentPage = 1;
-            renderTable();
-        });
-
-        prevBtn.addEventListener('click', () => {
-            currentPage--;
-            renderTable();
-        });
-
-        nextBtn.addEventListener('click', () => {
-            currentPage++;
-            renderTable();
-        });
-
-        // Initial render
+    // Event binding
+    searchInput.addEventListener('input', () => {
+        currentPage = 1;
         renderTable();
     });
+
+    entriesInput.addEventListener('input', () => {
+        if (entriesInput.value < 1) entriesInput.value = 1;
+        currentPage = 1;
+        renderTable();
+    });
+
+    prevBtn.addEventListener('click', () => {
+        currentPage--;
+        renderTable();
+    });
+
+    nextBtn.addEventListener('click', () => {
+        currentPage++;
+        renderTable();
+    });
+
+    // Initial render
+    renderTable();
+});
 </script>
 @endsection

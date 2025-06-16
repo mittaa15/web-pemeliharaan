@@ -6,7 +6,7 @@
 </head>
 
 @section('content')
-<div class="p-4 md:p-8 mt-20">
+<div class="p-4 md:p-8">
     <div class="bg-white rounded-md w-full py-6 md:py-10 px-4 md:px-10">
         <h1 class="text-primary font-bold text-lg md:text-xl">Form Laporan Perbaikan</h1>
         <hr class="border-black mt-4 md:mt-5">

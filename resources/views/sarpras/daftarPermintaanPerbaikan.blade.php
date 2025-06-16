@@ -23,7 +23,7 @@
 </script>
 @endif
 
-<div class="p-4 md:p-8 mt-20">
+<div class="p-4 md:p-8">
     <div class="bg-white rounded-md w-full py-6 md:py-10 px-4 md:px-10">
         <h1 class="text-primary font-bold text-xl mb-4">Daftar Permintaan Laporan</h1>
         <hr class="border-black mb-6">
@@ -49,8 +49,8 @@
                 <thead class="text-xs text-white uppercase bg-primary">
                     <tr>
                         <th class="px-4 py-3">No</th>
-                        <th class="px-4 py-3">Nomor Pengajuan</th>
                         <th class="px-4 py-3">Gedung</th>
+                        <th class="px-4 py-3">Lokasi</th>
                         <th class="px-4 py-3">Status</th>
                         <th class="px-4 py-3">Waktu Pembuatan</th>
                         <th class="px-4 py-3">Prioritas</th>
@@ -60,8 +60,8 @@
                     @foreach($RepairReports as $index => $report)
                     <tr class="cursor-pointer hover:bg-gray-100" data-id="{{ $report->id }}">
                         <td class="px-4 py-3">{{ $index + 1 }}</td>
-                        <td class="px-4 py-3">{{ str_pad($report->id, 4, '0', STR_PAD_LEFT) }}</td>
                         <td class="px-4 py-3">{{ $report->building->building_name ?? '-' }}</td>
+                        <td class="px-4 py-3">{{ $report->location_type ?? '-'}}</td>
                         <td class="px-4 py-3">
                             <span class="status-cell text-xs font-semibold px-2.5 py-0.5 rounded"
                                 data-status="{{ $report->status }}">{{ $report->status }}</span>
@@ -289,19 +289,29 @@
 </div>
 
 <div id="teknisiModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
-    <div class="bg-white w-full max-w-md rounded-lg shadow-lg p-6">
-        <form action="{{ route('isi-teknisi') }}" method="POST">
+    <div class="bg-white w-full max-w-md rounded-lg shadow-lg p-6 mx-4">
+        <form action="{{ route('create-teknisi-sarpras') }}" method="POST">
             @csrf
             <input type="hidden" name="id_report" id="teknisiReportId">
             <h2 class="text-lg font-bold mb-4 text-primary">Isi Nama Penanggung Jawab (Teknisi)</h2>
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Nama Teknisi</label>
-                <input type="text" name="nama_teknisi" required
-                    class="w-full border border-gray-300 rounded p-2 bg-white text-gray-700">
+            <div id="teknisiSelectContainer">
+                <div class="teknisi-select-group mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Teknisi</label>
+                    <select name="nama_teknisi[]" required class="input w-full bg-gray-100 text-black">
+                        <option value="" disabled selected>-- Pilih Teknisi --</option>
+                        @foreach ($TeknisiLists as $teknisi)
+                        <option value="{{ $teknisi->id }}">{{ $teknisi->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <button type="button" class="remove-btn hidden text-red-500 font-bold text-lg"
+                    onclick="removeTeknisiField(this)">×</button>
             </div>
+            <button type="button" onclick="addTeknisiSelect()" class="mb-4 text-sm text-blue-600 hover:underline">+
+                Tambah Teknisi</button>
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi Pekerjaan</label>
-                <textarea name="nama_teknisi" required
+                <textarea name="deskripsi_pekerjaan" required
                     class="w-full border border-gray-300 rounded p-2 bg-white text-gray-700" rows="4"
                     placeholder="Masukkan deskripsi pekerjaan..."></textarea>
             </div>
@@ -359,6 +369,31 @@
             default:
                 return 'bg-gray-100 text-gray-800';
         }
+    }
+
+    function addTeknisiSelect() {
+        const container = document.getElementById('teknisiSelectContainer');
+        const selectHTML = `
+            <div class="teknisi-select-group mb-4 flex gap-2 items-start">
+                <div class="w-full">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Teknisi</label>
+                    <select name="nama_teknisi[]" required class="input w-full bg-gray-100 text-black">
+                        <option value="" selected>-- Pilih Teknisi --</option>
+                        @foreach ($TeknisiLists as $teknisi)
+                            <option value="{{ $teknisi->id }}">{{ $teknisi->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <button type="button"
+                    class="remove-btn text-red-500 font-bold text-lg h-10 self-end"
+                    onclick="removeTeknisiField(this)">×</button>
+            </div>
+        `;
+        container.insertAdjacentHTML('beforeend', selectHTML);
+    }
+
+    function removeTeknisiField(button) {
+        button.closest('.teknisi-select-group').remove();
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -493,6 +528,16 @@
         `;
         }
 
+        // Ambil history dengan status "Pengecekan akhir"
+        const pengecekanAkhirHistory = laporan.histories?.find(
+            (item) => item.status === "Pengecekan akhir"
+        );
+
+        // Ambil foto perbaikan jika ada di status "Pengecekan akhir"
+        const repairPhoto = pengecekanAkhirHistory?.damage_photo ?
+            `<img src="/storage/${pengecekanAkhirHistory.damage_photo}" alt="Foto Perbaikan" class="max-w-xs max-h-48 rounded border border-gray-300 bukti-preview cursor-pointer" />` :
+            '-';
+
         document.getElementById('detailContent').innerHTML = `
         <tr><td class="px-6 py-3 font-semibold">Nomor Pengajuan</td><td class="px-6 py-3">${String(laporan.id).padStart(4, '0')}</td></tr>
         <tr><td class="px-6 py-3 font-semibold">Pengirim Laporan</td><td class="px-6 py-3">${laporan.user?.email ?? '-'}</td></tr>
@@ -504,11 +549,13 @@
         <tr><td class="px-6 py-3 font-semibold">Fasilitas Ruangan</td><td class="px-6 py-3">${laporan.room_facility?.facility_name ?? '-'}</td></tr>
         <tr><td class="px-6 py-3 font-semibold">Dampak Kerusakan</td><td class="px-6 py-3">${laporan.damage_impact}</td></tr>
         <tr><td class="px-6 py-3 font-semibold">Bukti Kerusakan</td><td class="px-6 py-3">${laporan.damage_photo? `<img src="/storage/${laporan.damage_photo}" alt="Bukti Kerusakan" class="max-w-xs max-h-48 rounded border border-gray-300 bukti-preview cursor-pointer" />` : '-'}</td></tr>
+        <tr><td class="px-6 py-3 font-semibold">Foto Perbaikan</td><td class="px-6 py-3">${repairPhoto}</td></tr>
         <tr><td class="px-6 py-3 font-semibold">Deskripsi Kerusakan</td><td class="px-6 py-3">${laporan.damage_description}</td></tr>
         <tr><td class="px-6 py-3 font-semibold">Tanggal Perbaikan</td><td class="px-6 py-3">${laporan.schedules?.repair_date ?? '-'}</td></tr>
         ${ekstra}
         ${opsiStatus}
     `;
+
         document.getElementById('approveButton').setAttribute('data-id-report', laporan.id);
         document.getElementById('approveButton').setAttribute('data-id-user', laporan.id_user);
 

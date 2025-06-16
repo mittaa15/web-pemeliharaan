@@ -6,7 +6,7 @@
 </head>
 
 @section('content')
-<div class="p-4 sm:p-8 max-w-4xl mx-auto mt-20">
+<div class="p-4 sm:p-8 max-w-4xl mx-auto">
     <div class="bg-white shadow-lg rounded-lg w-full p-6 sm:p-8">
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-primary font-bold text-xl sm:text-2xl">Profil Pengguna</h1>

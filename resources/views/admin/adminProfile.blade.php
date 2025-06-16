@@ -6,7 +6,7 @@
 </head>
 
 @section('content')
-<div class="p-8 mt-20">
+<div class="p-8">
     <div class="bg-white shadow-lg rounded-lg w-full p-8">
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-primary font-bold text-2xl">Profil Pengguna</h1>
@@ -19,12 +19,12 @@
 
 
         <script>
-        setTimeout(() => {
-            const alertBox = document.getElementById('success-alert');
-            if (alertBox) {
-                alertBox.style.display = 'none';
-            }
-        }, 3000); // 3000ms = 3 detik
+            setTimeout(() => {
+                const alertBox = document.getElementById('success-alert');
+                if (alertBox) {
+                    alertBox.style.display = 'none';
+                }
+            }, 3000); // 3000ms = 3 detik
         </script>
         @endif
         <hr class="border-gray-300 mb-6">
@@ -202,82 +202,82 @@
 
     @section('scripts')
     <script>
-    function togglePassword(inputId, toggleIconWrapper) {
-        const input = document.getElementById(inputId);
-        const eyeOpen = toggleIconWrapper.querySelector('.eye-open');
-        const eyeClosed = toggleIconWrapper.querySelector('.eye-closed');
+        function togglePassword(inputId, toggleIconWrapper) {
+            const input = document.getElementById(inputId);
+            const eyeOpen = toggleIconWrapper.querySelector('.eye-open');
+            const eyeClosed = toggleIconWrapper.querySelector('.eye-closed');
 
-        if (input.type === 'password') {
-            input.type = 'text';
-            eyeOpen.classList.add('hidden');
-            eyeClosed.classList.remove('hidden');
-        } else {
-            input.type = 'password';
-            eyeOpen.classList.remove('hidden');
-            eyeClosed.classList.add('hidden');
+            if (input.type === 'password') {
+                input.type = 'text';
+                eyeOpen.classList.add('hidden');
+                eyeClosed.classList.remove('hidden');
+            } else {
+                input.type = 'password';
+                eyeOpen.classList.remove('hidden');
+                eyeClosed.classList.add('hidden');
+            }
         }
-    }
-    // Menangani tombol edit profil untuk menampilkan modal
-    document.getElementById('editProfileBtn').addEventListener('click', function() {
-        document.getElementById('editProfileModal').classList.remove('hidden');
-    });
-    document.getElementById('ubahPwBtn').addEventListener('click', function() {
-        document.getElementById('changePassword').classList.remove('hidden');
-    });
-
-    // Menangani tombol close modal
-    document.getElementById('closeModalEdit').addEventListener('click', function() {
-        document.getElementById('editProfileModal').classList.add('hidden');
-    });
-    document.getElementById('closeModalUbah').addEventListener('click', function() {
-        document.getElementById('changePassword').classList.add('hidden');
-    });
-
-    document.addEventListener('DOMContentLoaded', function() {
-        const form = document.getElementById('changePasswordForm');
-        const alertBox = document.getElementById('passwordAlert');
-
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            const formData = new FormData(form);
-
-            fetch(form.action, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Accept': 'application/json'
-                    },
-                    body: formData
-                })
-                .then(async response => {
-                    if (response.ok) {
-                        const data = await response.json();
-                        showMessage('success', data.message || 'Password berhasil diubah.');
-                        form.reset();
-                    } else {
-                        const errorData = await response.json();
-                        if (errorData.errors) {
-                            const messages = Object.values(errorData.errors).flat().join(
-                                '<br>');
-                            showMessage('error', messages);
-                        } else {
-                            showMessage('error', errorData.message || 'Terjadi kesalahan.');
-                        }
-                    }
-                })
-                .catch(() => {
-                    showMessage('error', 'Terjadi kesalahan pada server.');
-                });
+        // Menangani tombol edit profil untuk menampilkan modal
+        document.getElementById('editProfileBtn').addEventListener('click', function() {
+            document.getElementById('editProfileModal').classList.remove('hidden');
+        });
+        document.getElementById('ubahPwBtn').addEventListener('click', function() {
+            document.getElementById('changePassword').classList.remove('hidden');
         });
 
-        function showMessage(type, message) {
-            alertBox.className = 'mb-4 px-4 py-2 rounded ' + (type === 'success' ?
-                'bg-green-100 text-green-800 border border-green-300' :
-                'bg-red-100 text-red-800 border border-red-300');
-            alertBox.innerHTML = message;
-            alertBox.classList.remove('hidden');
-        }
-    });
+        // Menangani tombol close modal
+        document.getElementById('closeModalEdit').addEventListener('click', function() {
+            document.getElementById('editProfileModal').classList.add('hidden');
+        });
+        document.getElementById('closeModalUbah').addEventListener('click', function() {
+            document.getElementById('changePassword').classList.add('hidden');
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('changePasswordForm');
+            const alertBox = document.getElementById('passwordAlert');
+
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const formData = new FormData(form);
+
+                fetch(form.action, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json'
+                        },
+                        body: formData
+                    })
+                    .then(async response => {
+                        if (response.ok) {
+                            const data = await response.json();
+                            showMessage('success', data.message || 'Password berhasil diubah.');
+                            form.reset();
+                        } else {
+                            const errorData = await response.json();
+                            if (errorData.errors) {
+                                const messages = Object.values(errorData.errors).flat().join(
+                                    '<br>');
+                                showMessage('error', messages);
+                            } else {
+                                showMessage('error', errorData.message || 'Terjadi kesalahan.');
+                            }
+                        }
+                    })
+                    .catch(() => {
+                        showMessage('error', 'Terjadi kesalahan pada server.');
+                    });
+            });
+
+            function showMessage(type, message) {
+                alertBox.className = 'mb-4 px-4 py-2 rounded ' + (type === 'success' ?
+                    'bg-green-100 text-green-800 border border-green-300' :
+                    'bg-red-100 text-red-800 border border-red-300');
+                alertBox.innerHTML = message;
+                alertBox.classList.remove('hidden');
+            }
+        });
     </script>
     @endsection

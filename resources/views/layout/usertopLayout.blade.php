@@ -1,5 +1,5 @@
 <!-- HEADER FIXED POSISI ATAS -->
-<div class="fixed top-0 z-40 w-full bg-white shadow px-4 sm:px-6 py-2 flex justify-between items-center">
+<div class="p-2 w-full bg-white">
     <div class="flex items-center gap-4 py-2 sm:py-4 w-full justify-end">
 
         @php $user = Auth::user(); @endphp

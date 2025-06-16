@@ -70,7 +70,7 @@ class AuthController extends Controller
                 'max:255',
                 'unique:users',
                 function ($attribute, $value, $fail) {
-                    if (!preg_match('/@((student|lecturer)\.itk\.ac\.id)$/', $value)) {
+                    if (!preg_match('/@((student|lecturer|staff)\.itk\.ac\.id)$/', $value)) {
                         $fail('Email harus menggunakan domain itk.');
                     }
                 },

@@ -6,7 +6,7 @@
 </head>
 
 @section('content')
-<div class="p-8 mt-20">
+<div class="p-8">
     @if(session('success'))
     <div id="success-alert" class="bg-green-100 text-green-800 flex justify-center p-2 mb-4 rounded">
         {{ session('success') }}

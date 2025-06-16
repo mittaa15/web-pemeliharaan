@@ -6,7 +6,7 @@
 </head>
 
 @section('content')
-<div class="p-8 mt-20">
+<div class="p-8">
     <div class="bg-white rounded-md w-full py-10 px-10">
         <h1 class="text-primary font-bold text-xl mb-4">Daftar Fasilitas Gedung</h1>
         <hr class="border-black mb-6">
@@ -42,23 +42,25 @@
             <div class="flex flex-col space-y-6 md:space-y-0 md:flex-row md:justify-between md:space-x-8">
                 <!-- Indoor Facilities -->
                 <div class="w-full">
-                    <h2 class="text-lg font-bold text-primary mb-2">Indoor Facilities</h2>
+                    <h2 class="text-lg font-bold text-primary mb-2">Fasilitas Gedung</h2>
                     <div class="overflow-x-auto">
                         <table class="table w-full text-sm text-left text-gray-600 border" id="indoorFacilitiesTable">
                             <thead class="bg-primary text-xs uppercase text-white">
                                 <tr>
                                     <th class="px-6 py-3">Gedung</th>
+                                    <th class="px-3 py-3">Lokasi</th>
                                     <th class="px-3 py-3">Nama Fasilitas</th>
                                     <th class="px-3 py-3">Deskripsi</th>
                                     <th class="px-6 py-3">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($indoorFacilities as $facility)
+                                @foreach ($facilities as $facility)
                                 <tr class="facility-row" data-id="{{ $facility->id }}"
                                     data-name="{{ $facility->facility_name }}"
                                     data-description="{{ $facility->description }}">
                                     <td class="px-6 py-3">{{ $facility->building->building_name }}</td>
+                                    <td class="px-6 py-3">{{ $facility->location}}</td>
                                     <td class="px-3 py-3">{{ $facility->facility_name }}</td>
                                     <td class="px-3 py-3">{{ $facility->description }}</td>
                                     <td class="px-6 py-3 relative">
@@ -85,50 +87,6 @@
             </div>
         </div>
 
-
-        <!-- Outdoor Facilities -->
-        <div class="w-full overflow-x-auto">
-            <h2 class="text-lg font-bold text-primary mb-2">Outdoor Facilities</h2>
-            <div class="overflow-x-auto">
-                <table class="table w-full text-sm text-left text-gray-600 border" id="outdoorFacilitiesTable">
-                    <thead class="bg-primary text-xs uppercase text-white">
-                        <tr>
-                            <th class="px-6 py-3">Gedung</th>
-                            <th class="px-3 py-3">Nama Fasilitas</th>
-                            <th class="px-3 py-3">Deskripsi</th>
-                            <th class="px-6 py-3">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($outdoorFacilities as $facility)
-                        <tr class="facility-row" data-name="{{ $facility->facility_name }}"
-                            data-id="{{ $facility->id }}" data-description="{{ $facility->description }}">
-                            <td class="px-6 py-3">{{ $facility->building->building_name }}</td>
-                            <td class="px-3 py-3">{{ $facility->facility_name }}</td>
-                            <td class="px-3 py-3">{{ $facility->description }}</td>
-                            <td class="px-6 py-3 relative">
-                                <div class="relative inline-block text-left">
-                                    <button onclick="toggleDropdown(this)" class="text-primary hover:underline">
-                                        Aksi ▼
-                                    </button>
-                                    <div
-                                        class="dropdown-menu hidden absolute right-0 mt-2 w-36 bg-white border rounded shadow-lg z-10">
-                                        <button onclick="showFacilityDetails(this)"
-                                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left">Detail</button>
-                                        <button onclick="editFacility(this)"
-                                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left">Edit</button>
-                                        <button onclick="deleteFacility(this)"
-                                            class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100 w-full text-left">Hapus</button>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
         <!-- Form Delete -->
         <form id="deleteFacilityForm" method="POST" style="display: none;">
             @csrf
@@ -141,7 +99,10 @@
             class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
             <div class="bg-white p-6 rounded-lg w-full max-w-md mx-4 sm:mx-auto">
                 <h2 class="text-lg font-bold mb-4 text-primary">Tambah Fasilitas</h2>
-                <form id="addFacilityForm" method="POST" action="{{ route('create_building_facility') }}">
+
+                <div id="alertBox" class="hidden p-4 mb-4 rounded-lg text-sm" role="alert"></div>
+
+                <form id="addFacilityForm" method="POST" action="#">
                     @csrf
                     <div class="mb-4">
                         <label class="block text-sm font-medium mb-1 text-primary">Gedung</label>
@@ -175,8 +136,8 @@
                         </select>
                     </div>
                     <div class="mt-6 flex justify-end">
-                        <button type="button" onclick="closeModal('addFacilityModal')"
-                            class="mr-2 bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 text-sm">Batal</button>
+                        <button type="button" onclick="closeModalAdd()"
+                            class="mr-2 bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 text-sm">Tutup</button>
                         <button type="submit"
                             class="bg-primary text-white px-4 py-2 rounded hover:bg-blue-700 text-sm">Simpan</button>
                     </div>
@@ -283,12 +244,6 @@
         </div>
 
         <script>
-            const indoor = @json($indoorFacilities);
-            const outdoor = @json($outdoorFacilities);
-
-            console.log(indoor);
-            console.log(outdoor);
-
             function toggleDropdown(button) {
                 const dropdown = button.nextElementSibling;
                 document.querySelectorAll('.dropdown-menu').forEach(menu => {
@@ -305,6 +260,11 @@
 
             function closeModal(id) {
                 document.getElementById(id).classList.add('hidden');
+            }
+
+            function closeModalAdd() {
+                document.getElementById('addFacilityModal').classList.add('hidden');
+                location.reload();
             }
 
             let selectedFacility = null;
@@ -438,6 +398,69 @@
                     filterTable('indoorFacilitiesTable');
                     filterTable('outdoorFacilitiesTable');
                 });
+            });
+
+            document.getElementById('addFacilityForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const form = e.target;
+                const alertBox = document.getElementById('alertBox');
+
+                // Reset alert
+                alertBox.classList.add('hidden');
+                alertBox.innerHTML = '';
+                alertBox.className = 'hidden p-4 mb-4 rounded-lg text-sm';
+
+                const formData = {
+                    id_building: document.getElementById('addFacilityBuilding').value,
+                    facility_name: document.getElementById('addFacilityName').value,
+                    description: document.getElementById('addFacilityDescription').value,
+                    location: document.getElementById('addFacilityType').value,
+                };
+
+                fetch("{{ route('create_building_facility') }}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json',
+                        },
+                        body: JSON.stringify(formData),
+                    })
+                    .then(response => {
+                        if (!response.ok) return response.json().then(err => Promise.reject(err));
+                        return response.json();
+                    })
+                    .then(data => {
+                        showAlert('success', data.message || 'Fasilitas berhasil ditambahkan.');
+                        form.reset();
+                    })
+                    .catch(error => {
+                        let message = 'Terjadi kesalahan.';
+
+                        if (error.errors) {
+                            message = Object.values(error.errors).join('<br>');
+                        } else if (error.message) {
+                            message = error.message;
+                        }
+
+                        showAlert('error', message);
+                    });
+
+                function showAlert(type, message) {
+                    alertBox.innerHTML = message;
+                    alertBox.classList.remove('hidden');
+
+                    if (type === 'success') {
+                        alertBox.classList.add('bg-green-100', 'text-green-700', 'border', 'border-green-400');
+                    } else {
+                        alertBox.classList.add('bg-red-100', 'text-red-700', 'border', 'border-red-400');
+                    }
+
+                    setTimeout(() => {
+                        alertBox.classList.add('hidden');
+                    }, 3000); // Hilang otomatis setelah 5 detik
+                }
             });
         </script>
         @endsection

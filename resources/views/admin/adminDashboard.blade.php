@@ -6,7 +6,7 @@
 </head>
 
 @section('content')
-<div class="container mx-auto px-4 mb-8 mt-20">
+<div class="container mx-auto px-4 mb-8">
 
     @php
     $cards = [

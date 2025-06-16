@@ -23,7 +23,7 @@
 </style>
 
 
-<div class="p-8 mt-20">
+<div class="p-8">
     <div class="bg-white rounded-md w-full py-10 px-6 sm:px-10">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 space-y-4 sm:space-y-0">
             <h1 class="text-primary font-bold text-xl">Daftar Gedung</h1>

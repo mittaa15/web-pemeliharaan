@@ -8,6 +8,8 @@ use App\Models\Building;
 use App\Models\Notification;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Validator;
 
 class RoomController extends Controller
 {
@@ -29,17 +31,23 @@ class RoomController extends Controller
      */
     public function create(Request $request)
     {
-        // dd($request->all());
-
         $request->validate([
             'id_building' => 'required|exists:building,id',
-            'room_name' => 'required|string|max:255',
+            'room_name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('room')->where(function ($query) use ($request) {
+                    return $query->where('id_building', $request->id_building);
+                }),
+            ],
             'room_type' => 'nullable|string',
             'capacity' => 'nullable|integer',
             'description' => 'nullable|string',
+        ], [
+            'room_name.unique' => 'Nama ruangan untuk gedung ini sudah ada, silakan gunakan nama lain.',
         ]);
 
-        // Menyimpan data ruangan baru
         Room::create([
             'id_building' => $request->id_building,
             'room_name' => $request->room_name,
@@ -48,7 +56,7 @@ class RoomController extends Controller
             'description' => $request->description,
         ]);
 
-        return redirect('/admin-data-ruang')->with('success', 'Ruangan berhasil ditambahkan.');
+        return response()->json(['message' => 'Ruangan berhasil ditambahkan.']);
     }
 
     /**

@@ -6,7 +6,7 @@
 </head>
 
 @section('content')
-<div class="p-8 mt-20">
+<div class="p-8">
     <div class="bg-white rounded-md w-full py-10 px-10">
         <h1 class="text-primary font-bold text-xl mb-4">Daftar Gedung</h1>
         <hr class="border-black mb-6">
@@ -24,12 +24,12 @@
 
         @if(session('success'))
         <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                closeModal('addFacilityModal');
-                setTimeout(function() {
-                    alert("{{ session('success') }}");
-                }, 300);
-            });
+        document.addEventListener('DOMContentLoaded', function() {
+            closeModal('addFacilityModal');
+            setTimeout(function() {
+                alert("{{ session('success') }}");
+            }, 300);
+        });
         </script>
         @endif
 
@@ -83,90 +83,100 @@
     <!-- Modal Tambah -->
     <div id="addFacilityModal"
         class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-        <<div class="bg-white p-6 rounded-lg w-full max-w-md mx-4 sm:mx-auto">
+        <div class="bg-white p-6 rounded-lg w-full max-w-md mx-4 sm:mx-auto">
             <h2 class="text-lg font-bold mb-4 text-primary">Tambah Fasilitas</h2>
-            <form id="addFacilityForm" action="{{ route('create_building') }}" method="POST">
+
+            <!-- Notifikasi Sukses / Gagal -->
+            <div id="addFacilityAlert" class="hidden mb-4 text-sm px-4 py-2 rounded"></div>
+
+            <form id="addFacilityForm" method="POST">
                 @csrf
                 <div class="mb-4">
                     <label class="block text-sm font-medium mb-1 text-primary">Nama Fasilitas</label>
                     <input type="text" id="addFacilityName" name="building_name"
                         class="input input-bordered w-full bg-white text-gray-600 border-gray-300" required>
                 </div>
+
                 <div class="mb-4">
                     <label class="block text-sm font-medium mb-1 text-primary">Deskripsi</label>
                     <textarea id="addFacilityDescription" name="description"
                         class="input input-bordered w-full bg-white text-gray-600 border-gray-300" required></textarea>
                 </div>
+
                 <div class="mt-6 flex justify-end">
-                    <button type="button" onclick="closeModal('addFacilityModal')"
+                    <button type="button" onclick="closeModalAdd()"
+                        class="mr-2 bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 text-sm">Tutup</button>
+                    <button type="submit"
+                        class="bg-primary text-white px-4 py-2 rounded hover:bg-blue-700 text-sm">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- Modal Detail -->
+    <div id="detailFacilityModal"
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white p-6 rounded-lg w-full max-w-md mx-4 sm:mx-auto">
+            <h2 class="text-lg text-primary font-bold mb-4">Detail Fasilitas</h2>
+            <div class="grid grid-cols-3 gap-y-2 text-sm text-gray-700">
+                <div class="font-semibold">Nama</div>
+                <div class="col-span-2" id="facilityName">:</div>
+                <div class="font-semibold">Deskripsi</div>
+                <div class="col-span-2" id="facilityDescription">:</div>
+            </div>
+            <div class="mt-6 flex justify-end">
+                <button onclick="closeModal('detailFacilityModal')"
+                    class="bg-primary text-white px-4 py-2 rounded hover:bg-blue-700 text-sm">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Edit -->
+    <div id="editFacilityModal"
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white p-6 rounded-lg w-full max-w-md mx-4 sm:mx-auto">
+            <h2 class="text-lg text-primary font-bold mb-4">Edit Fasilitas</h2>
+            <form id="editFacilityForm" method="POST" action="">
+                @csrf
+                @method('PATCH')
+                <div class="mb-4">
+                    <label class="block text-primary text-sm font-medium mb-1">Nama Fasilitas</label>
+                    <input type="text" id="editFacilityName" name="building_name"
+                        class="input input-bordered w-full bg-white text-gray-600 border-gray-300" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm text-primary font-medium mb-1">Deskripsi</label>
+                    <textarea id="editFacilityDescription" name="description"
+                        class="input input-bordered w-full bg-white text-gray-600 border-gray-300" required></textarea>
+                </div>
+                <div class="mt-6 flex justify-end">
+                    <button type="button" onclick="closeModal('editFacilityModal')"
                         class="mr-2 bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 text-sm">Batal</button>
                     <button type="submit"
                         class="bg-primary text-white px-4 py-2 rounded hover:bg-blue-700 text-sm">Simpan</button>
                 </div>
             </form>
-    </div>
-</div>
-
-<!-- Modal Detail -->
-<div id="detailFacilityModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-    <div class="bg-white p-6 rounded-lg w-full max-w-md mx-4 sm:mx-auto">
-        <h2 class="text-lg text-primary font-bold mb-4">Detail Fasilitas</h2>
-        <div class="grid grid-cols-3 gap-y-2 text-sm text-gray-700">
-            <div class="font-semibold">Nama</div>
-            <div class="col-span-2" id="facilityName">:</div>
-            <div class="font-semibold">Deskripsi</div>
-            <div class="col-span-2" id="facilityDescription">:</div>
-        </div>
-        <div class="mt-6 flex justify-end">
-            <button onclick="closeModal('detailFacilityModal')"
-                class="bg-primary text-white px-4 py-2 rounded hover:bg-blue-700 text-sm">Tutup</button>
         </div>
     </div>
-</div>
 
-<!-- Modal Edit -->
-<div id="editFacilityModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-    <div class="bg-white p-6 rounded-lg w-full max-w-md mx-4 sm:mx-auto">
-        <h2 class="text-lg text-primary font-bold mb-4">Edit Fasilitas</h2>
-        <form id="editFacilityForm" method="POST" action="">
-            @csrf
-            @method('PATCH')
-            <div class="mb-4">
-                <label class="block text-primary text-sm font-medium mb-1">Nama Fasilitas</label>
-                <input type="text" id="editFacilityName" name="building_name"
-                    class="input input-bordered w-full bg-white text-gray-600 border-gray-300" required>
+    <!-- Modal Hapus -->
+    <div id="confirmDeleteModal"
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white p-6 rounded-lg w-full max-w-md mx-4 sm:mx-auto">
+            <h2 class="text-lg font-bold text-primary mb-4">Konfirmasi Hapus</h2>
+            <p class="text-gray-700 mb-6 text-sm">Apakah Anda yakin ingin menghapus <span id="facilityToDeleteName"
+                    class="text-primary font-semibold"></span>? Data ini akan dihapus permanen.</p>
+            <div class="flex justify-end">
+                <button onclick="closeModal('confirmDeleteModal')"
+                    class="bg-gray-500 text-white px-4 py-2 rounded mr-2 hover:bg-gray-600 text-sm">Batal</button>
+                <button id="confirmDeleteButton"
+                    class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 text-sm">Hapus</button>
             </div>
-            <div class="mb-4">
-                <label class="block text-sm text-primary font-medium mb-1">Deskripsi</label>
-                <textarea id="editFacilityDescription" name="description"
-                    class="input input-bordered w-full bg-white text-gray-600 border-gray-300" required></textarea>
-            </div>
-            <div class="mt-6 flex justify-end">
-                <button type="button" onclick="closeModal('editFacilityModal')"
-                    class="mr-2 bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 text-sm">Batal</button>
-                <button type="submit"
-                    class="bg-primary text-white px-4 py-2 rounded hover:bg-blue-700 text-sm">Simpan</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- Modal Hapus -->
-<div id="confirmDeleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-    <div class="bg-white p-6 rounded-lg w-full max-w-md mx-4 sm:mx-auto">
-        <h2 class="text-lg font-bold text-primary mb-4">Konfirmasi Hapus</h2>
-        <p class="text-gray-700 mb-6 text-sm">Apakah Anda yakin ingin menghapus <span id="facilityToDeleteName"
-                class="text-primary font-semibold"></span>? Data ini akan dihapus permanen.</p>
-        <div class="flex justify-end">
-            <button onclick="closeModal('confirmDeleteModal')"
-                class="bg-gray-500 text-white px-4 py-2 rounded mr-2 hover:bg-gray-600 text-sm">Batal</button>
-            <button id="confirmDeleteButton"
-                class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 text-sm">Hapus</button>
         </div>
     </div>
-</div>
 
-<script>
+    <script>
     function toggleDropdown(button) {
         const dropdown = button.nextElementSibling;
         document.querySelectorAll('.dropdown-menu').forEach(menu => {
@@ -181,6 +191,11 @@
 
     function closeModal(id) {
         document.getElementById(id).classList.add('hidden');
+    }
+
+    function closeModalAdd() {
+        document.getElementById('addFacilityModal').classList.add('hidden');
+        location.reload();
     }
 
     function showFacilityDetails(button) {
@@ -283,5 +298,104 @@
         // Tampilkan awal
         updateFilter();
     });
-</script>
-@endsection
+
+    document.getElementById('addFacilityForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const form = this;
+        const url = "{{ route('create_building') }}";
+        const token = document.querySelector('input[name="_token"]').value;
+        const building_name = document.getElementById('addFacilityName').value;
+        const description = document.getElementById('addFacilityDescription').value;
+        const alertBox = document.getElementById('addFacilityAlert');
+
+        fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': token,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    building_name: building_name,
+                    description: description
+                })
+            })
+            .then(async res => {
+                const data = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(data.message || 'Terjadi kesalahan server.');
+                }
+
+                // Sukses
+                alertBox.className =
+                    'mb-4 text-sm px-4 py-2 rounded bg-green-100 text-green-700 border border-green-300';
+                alertBox.innerText = data.message;
+                alertBox.classList.remove('hidden');
+
+                setTimeout(() => {
+                    alertBox.classList.add('hidden');
+                }, 3000);
+            })
+            .catch(err => {
+                alertBox.className =
+                    'mb-4 text-sm px-4 py-2 rounded bg-red-100 text-red-700 border border-red-300';
+                alertBox.innerText = err.message;
+                alertBox.classList.remove('hidden');
+            });
+    });
+
+
+
+    // document.getElementById('addFacilityForm').addEventListener('submit', function(e) {
+    //     e.preventDefault();
+
+    //     const form = this;
+
+    //   
+    //     const building_name = document.getElementById('addFacilityName').value;
+    //     const description = document.getElementById('addFacilityDescription').value;
+    //     const alertBox = document.getElementById('addFacilityAlert');
+
+    //     fetch(url, {
+    //             method: 'POST',
+    //             headers: {
+    //                 'X-CSRF-TOKEN': token,
+    //                 'Content-Type': 'application/json',
+    //             },
+    //             body: JSON.stringify({
+    //                 building_name: building_name,
+    //                 description: description
+    //             })
+    //         })
+    //         .then(res => res.json())
+    //         .then(data => {
+    //             if (data.success) {
+    //                 alertBox.className =
+    //                     "bg-green-100 text-green-800 border border-green-300 rounded px-4 py-2 mb-4 text-sm";
+    //                 alertBox.innerText = data.message;
+    //                 alertBox.classList.remove('hidden');
+
+    //                 form.reset();
+
+    //                 setTimeout(() => {
+    //                     alertBox.classList.add('hidden');
+    //                     closeModal('addFacilityModal');
+    //                     location.reload(); // Atau refresh tabel data aja via Ajax
+    //                 }, 1500);
+    //             } else {
+    //                 alertBox.className =
+    //                     "bg-red-100 text-red-800 border border-red-300 rounded px-4 py-2 mb-4 text-sm";
+    //                 alertBox.innerText = data.message || "Terjadi kesalahan.";
+    //                 alertBox.classList.remove('hidden');
+    //             }
+    //         })
+    //         .catch(err => {
+    //             alertBox.className =
+    //                 "bg-red-100 text-red-800 border border-red-300 rounded px-4 py-2 mb-4 text-sm";
+    //             alertBox.innerText = "Terjadi kesalahan server.";
+    //             alertBox.classList.remove('hidden');
+    //         });
+    // });
+    </script>
+    @endsection

@@ -67,6 +67,7 @@ Route::middleware(['auth', 'auth.sarpras'])->group(function () {
     Route::post('/reject', [RepairHistoryController::class, 'reject'])->name('reject-repair');
     Route::delete('/delete-report/{repairReport}', [RepairReportController::class, 'destroy'])->name('delete-report');
     Route::post('/isi-teknisi', [RepairScheduleController::class, 'isiTeknisi'])->name('isi-teknisi');
+    Route::post('/create-teknisi-sarpras', [AdminDashboardController::class, 'isiTeknisi'])->name('create-teknisi-sarpras');
     Route::get('/sarpras-profile', [SarprasDashboardController::class, 'sarprasProfileView']);
     Route::get('/riwayat-perbaikan', [SarprasDashboardController::class, 'riwayatPerbaikanView']);
     Route::get('/data-gedung', [SarprasDashboardController::class, 'dataGedungView']);

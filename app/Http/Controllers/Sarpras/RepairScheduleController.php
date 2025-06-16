@@ -135,8 +135,10 @@ class RepairScheduleController extends Controller
 
     public function uploadPerbaikan(Request $request)
     {
+        // dd($request->all());
         $request->validate([
             'id_report' => 'required|exists:repair_report,id',
+            'id_user' => 'required|exists:users,id',
             'repair_photo' => 'required|image|mimes:jpeg,png,jpg|max:2048',
             'repair_description' => 'required|string|max:1000',
         ]);
@@ -169,6 +171,12 @@ class RepairScheduleController extends Controller
                 'complete_date' => Carbon::now(),
             ]);
         }
+
+        Notification::createNotification(
+            $request->id_user,
+            'Laporan Anda diupdate menjadi Pengecekan Akhir',
+            'Silahkan periksa di dihalaman daftar laporan'
+        );
 
         return redirect()->back()->with('success', 'Data perbaikan berhasil disimpan untuk semua laporan terkait.');
     }

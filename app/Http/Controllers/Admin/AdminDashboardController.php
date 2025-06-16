@@ -57,19 +57,8 @@ class AdminDashboardController extends Controller
 
     public function adminDaftarPermintaanPerbaikanView(Request $request)
     {
-        // Ambil laporan yang statusnya 'Diproses'
-        $diprosesReports = RepairReport::with([
-            'room',
-            'roomFacility',
-            'building',
-            'buildingFacility',
-            'latestHistory',
-            'schedules',
-            'user',
-        ])->where('status', 'Diproses')->get();
-
-        // Ambil laporan selain status tertentu dan lakukan grouping
-        $otherReportsRaw = RepairReport::with([
+        // Ambil semua laporan yang statusnya bukan 'Selesai', 'Ditolak', atau 'Dibatalkan'
+        $allReports = RepairReport::with([
             'room',
             'roomFacility',
             'building',
@@ -78,31 +67,21 @@ class AdminDashboardController extends Controller
             'schedules',
             'user',
         ])
-            ->whereNotIn('status', ['Diproses', 'Selesai', 'Ditolak', 'Dibatalkan'])
+            ->whereNotIn('status', ['Selesai', 'Ditolak', 'Dibatalkan'])
             ->get();
 
-        // Grouping berdasarkan kombinasi ID
-        $grouped = $otherReportsRaw->groupBy(function ($item) {
-            return implode('-', [
-                $item->id_room,
-                $item->id_facility_room,
-                $item->id_building,
-                $item->id_facility_building,
-            ]);
-        });
+        // Pisahkan laporan dengan status 'Diproses'
+        $diprosesReports = $allReports->filter(function ($report) {
+            return $report->status === 'Diproses';
+        })->sortByDesc('damage_point');
 
-        $groupedOtherReports = collect();
-        foreach ($grouped as $group) {
-            $groupedOtherReports->push($group->first());
-        }
+        // Laporan lainnya
+        $otherReports = $allReports->filter(function ($report) {
+            return $report->status !== 'Diproses';
+        })->sortByDesc('damage_point');
 
-        // Gabungkan kedua hasil
-        $RepairReports = $diprosesReports->merge($groupedOtherReports);
-
-        $RepairReports = $RepairReports->sortBy([
-            ['damage_point', 'desc'],
-            ['created_at', 'asc'],
-        ])->values(); // reset index
+        // Gabungkan laporan: Diproses dulu, lalu lainnya
+        $RepairReports = $diprosesReports->concat($otherReports)->values();
 
         // Ambil teknisi & notifikasi
         $TeknisiLists = Technician::all();

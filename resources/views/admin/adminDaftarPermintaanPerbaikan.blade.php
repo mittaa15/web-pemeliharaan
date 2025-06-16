@@ -23,7 +23,7 @@
 </script>
 @endif
 
-<div class="p-4 md:p-8 mt-20">
+<div class="p-4 md:p-8">
     <div class="bg-white rounded-md w-full py-6 md:py-10 px-4 md:px-10">
         <h1 class="text-primary font-bold text-lg md:text-xl mb-4">Daftar Permintaan Laporan</h1>
         <hr class="border-black mb-6">
@@ -49,8 +49,8 @@
                 <thead class="text-xs text-white uppercase bg-primary">
                     <tr>
                         <th class="px-4 py-3">No</th>
-                        <th class="px-4 py-3">Nomor Pengajuan</th>
                         <th class="px-4 py-3">Gedung</th>
+                        <th class="px-4 py-3">Lokasi</th>
                         <th class="px-4 py-3">Status</th>
                         <th class="px-4 py-3">Waktu Pembuatan</th>
                         <th class="px-4 py-3">Prioritas</th>
@@ -60,8 +60,8 @@
                     @foreach($RepairReports as $index => $report)
                     <tr class="cursor-pointer hover:bg-gray-100" data-id="{{ $report->id }}">
                         <td class="px-4 py-3">{{ $index + 1 }}</td>
-                        <td class="px-4 py-3">{{ str_pad($report->id, 4, '0', STR_PAD_LEFT) }}</td>
                         <td class="px-4 py-3">{{ $report->building->building_name ?? '-' }}</td>
+                        <td class="px-4 py-3">{{ $report->location_type ?? '-' }}</td>
                         <td class="px-4 py-3">
                             <span class="status-cell text-xs font-semibold px-2.5 py-0.5 rounded"
                                 data-status="{{ $report->status }}">{{ $report->status }}</span>
@@ -264,6 +264,7 @@
     <div class="bg-white w-full max-w-md rounded-lg shadow-lg p-6 mx-4">
         <form action="{{ route('upload-perbaikan-admin') }}" method="POST" enctype="multipart/form-data">
             @csrf
+            <input type="hidden" name="id_user" id="userIdRepair">
             <input type="hidden" name="id_report" id="repairReportId">
             <h2 class="text-lg font-bold mb-4 text-primary">Upload Bukti Perbaikan</h2>
 
@@ -513,11 +514,11 @@
             opsiStatus = `
         <tr>
             <td colspan="2" class="px-6 py-3 text-right">
-                <form action="${updateStatusUrlAdmin}" method="POST">
+                <form action="${updateStatusUrl}" method="POST">
                     <input type="hidden" name="_token" value="${csrfToken}">
                     <input type="hidden" name="id_report" value="${laporan.id}">
                     <input type="hidden" name="id_user" value="${laporan.id_user}">
-                    <select name="status" onchange="handleStatusChange(this, ${laporan.id})" class="border rounded px-2 py-1 bg-white">
+                    <select name="status" onchange="handleStatusChange(this, ${laporan.id}, ${laporan.id_user})" class="border rounded px-2 py-1 bg-white">
                         <option value="">Ubah Status</option>
                         <option value="Dalam proses pengerjaan" ${laporan.status === 'Dalam proses pengerjaan' ? 'selected' : ''}>Dalam proses pengerjaan</option>
                         <option value="Pengecekan akhir" ${laporan.status === 'Pengecekan akhir' ? 'selected' : ''}>Pengecekan akhir</option>
@@ -528,6 +529,16 @@
         </tr>
         `;
         }
+
+        // Ambil history dengan status "Pengecekan akhir"
+        const pengecekanAkhirHistory = laporan.histories?.find(
+            (item) => item.status === "Pengecekan akhir"
+        );
+
+        // Ambil foto perbaikan jika ada di status "Pengecekan akhir"
+        const repairPhoto = pengecekanAkhirHistory?.damage_photo ?
+            `<img src="/storage/${pengecekanAkhirHistory.damage_photo}" alt="Foto Perbaikan" class="max-w-xs max-h-48 rounded border border-gray-300 bukti-preview cursor-pointer" />` :
+            '-';
 
         document.getElementById('detailContent').innerHTML = `
         <tr><td class="px-6 py-3 font-semibold">Nomor Pengajuan</td><td class="px-6 py-3">${String(laporan.id).padStart(4, '0')}</td></tr>
@@ -540,6 +551,7 @@
         <tr><td class="px-6 py-3 font-semibold">Fasilitas Ruangan</td><td class="px-6 py-3">${laporan.room_facility?.facility_name ?? '-'}</td></tr>
         <tr><td class="px-6 py-3 font-semibold">Dampak Kerusakan</td><td class="px-6 py-3">${laporan.damage_impact}</td></tr>
         <tr><td class="px-6 py-3 font-semibold">Bukti Kerusakan</td><td class="px-6 py-3">${laporan.damage_photo? `<img src="/storage/${laporan.damage_photo}" alt="Bukti Kerusakan" class="max-w-xs max-h-48 rounded border border-gray-300 bukti-preview cursor-pointer" />` : '-'}</td></tr>
+        <tr><td class="px-6 py-3 font-semibold">Foto Perbaikan</td><td class="px-6 py-3">${repairPhoto}</td></tr>
         <tr><td class="px-6 py-3 font-semibold">Deskripsi Kerusakan</td><td class="px-6 py-3">${laporan.damage_description}</td></tr>
         <tr><td class="px-6 py-3 font-semibold">Tanggal Perbaikan</td><td class="px-6 py-3">${laporan.schedules?.repair_date ?? '-'}</td></tr>
         ${ekstra}
@@ -689,11 +701,12 @@
         document.getElementById(modalId).classList.add('hidden');
     }
 
-    function handleStatusChange(selectEl, reportId) {
+    function handleStatusChange(selectEl, reportId, userId) {
         const status = selectEl.value;
 
         if (status === "Pengecekan akhir") {
             document.getElementById('repairReportId').value = reportId;
+            document.getElementById('userIdRepair').value = userId;
             openModal('repairModal');
         } else if (status === "Selesai") {
             document.getElementById('teknisiReportId').value = reportId;

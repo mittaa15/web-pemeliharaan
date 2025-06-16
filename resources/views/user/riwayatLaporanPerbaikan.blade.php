@@ -6,7 +6,7 @@
 </head>
 
 @section('content')
-<div class="p-4 md:p-8 mt-20">
+<div class="p-4 md:p-8">
     <div class="bg-white rounded-md w-full py-6 px-4 md:py-10 md:px-10">
         <h1 class="text-primary font-bold text-xl md:text-2xl mb-4">Riwayat Perbaikan</h1>
         <hr class="border-black mb-6">
@@ -239,40 +239,30 @@
         }
 
         const detailContent = document.getElementById('detailContent');
+        // Cari data history dengan status "Pengecekan akhir"
+        const pengecekanAkhirHistory = laporan.histories?.find(
+            (item) => item.status === "Pengecekan akhir"
+        );
+
+        // Ambil foto perbaikan jika ada
+        const repairPhoto = pengecekanAkhirHistory?.damage_photo ?
+            `<img src="/storage/${pengecekanAkhirHistory.damage_photo}" alt="Foto Perbaikan" class="max-w-xs max-h-48 rounded border border-gray-300 bukti-preview cursor-pointer" onclick="openImagePreview('/storage/${pengecekanAkhirHistory.damage_photo}')" />` :
+            '-';
+
         detailContent.innerHTML = `
         <tr><td class="px-6 py-3 font-semibold">Nomor Pengajuan</td><td class="px-6 py-3">${String(laporan.id).padStart(4, '0')}</td></tr>
-        <tr>
-            <td class="px-6 py-3 font-semibold">Status Laporan Terkini</td>
-            <td class="px-6 py-3">
-                <span class="text-xs font-semibold inline-block px-2 py-1 rounded ${getStatusLabelClass(laporan.status)}">
-                    ${laporan.status}
-                </span>
-            </td>
-        </tr>
+        <tr><td class="px-6 py-3 font-semibold">Status Laporan Terkini</td><td class="px-6 py-3"><span class="text-xs font-semibold inline-block px-2 py-1 rounded ${getStatusLabelClass(laporan.status)}">${laporan.status}</span></td></tr>
         <tr><td class="px-6 py-3 font-semibold">Tanggal Diajukan</td><td class="px-6 py-3">${formatDateUTC(laporan.created_at)}</td></tr>
         <tr><td class="px-6 py-3 font-semibold">Gedung</td><td class="px-6 py-3">${laporan.building?.building_name ?? '-'}</td></tr>
         <tr><td class="px-6 py-3 font-semibold">Ruangan</td><td class="px-6 py-3">${laporan.room?.room_name ?? '-'}</td></tr>
         <tr><td class="px-6 py-3 font-semibold">Fasilitas Gedung</td><td class="px-6 py-3">${laporan.building_facility?.facility_name ?? '-'}</td></tr>
         <tr><td class="px-6 py-3 font-semibold">Fasilitas Ruangan</td><td class="px-6 py-3">${laporan.room_facility?.facility_name ?? '-'}</td></tr>
         <tr><td class="px-6 py-3 font-semibold">Deskripsi Kerusakan</td><td class="px-6 py-3">${laporan.damage_description}</td></tr>
-                 <tr><td class="px-6 py-3 font-semibold">Dampak Kerusakan</td><td class="px-6 py-3">${laporan.damage_impact}</td></tr>
-<tr>
-    <td class="px-6 py-3 font-semibold">Bukti Kerusakan</td>
-    <td class="px-6 py-3">
-        ${
-          laporan.damage_photo
-            ? `<img 
-                 src="/storage/${laporan.damage_photo}" 
-                 alt="Bukti Kerusakan" 
-                 class="max-w-xs max-h-48 rounded border border-gray-300 bukti-preview cursor-pointer" 
-                 onclick="openImagePreview('/storage/${laporan.damage_photo}')" 
-               />`
-            : '-'
-        }
-    </td>
-</tr>   
+        <tr><td class="px-6 py-3 font-semibold">Dampak Kerusakan</td><td class="px-6 py-3">${laporan.damage_impact}</td></tr>
+        <tr><td class="px-6 py-3 font-semibold">Bukti Kerusakan</td><td class="px-6 py-3">${laporan.damage_photo? `<img src="/storage/${laporan.damage_photo}" alt="Bukti Kerusakan" class="max-w-xs max-h-48 rounded border border-gray-300 bukti-preview cursor-pointer" onclick="openImagePreview('/storage/${laporan.damage_photo}')" />`: '-'}</td></tr>   
+        <tr><td class="px-6 py-3 font-semibold">Foto Perbaikan</td><td class="px-6 py-3">${repairPhoto}</td></tr>
         <tr><td class="px-6 py-3 font-semibold">Riwayat Perbaikan Terakhir</td><td class="px-6 py-3">${riwayatHtml}</td></tr>
-        <tr><td class="px-6 py-3 font-semibold">Nama Teknisi</td><td class="px-6 py-3">${laporan.schedules?.technician_name ?? '-'}</td></tr>
+        <tr><td class="px-6 py-3 font-semibold">Nama Teknisi</td><td class="px-6 py-3">${laporan.technicians?.length? laporan.technicians.map(t => t.name).join(', '): '-'}</td></tr>
         <tr><td class="px-6 py-3 font-semibold">Tanggal Perbaikan</td><td class="px-6 py-3">${laporan.schedules?.repair_date ?? '-'}</td></tr>
     `;
 

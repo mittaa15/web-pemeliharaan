@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Notification;
 use App\Models\Building;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class BuildingFacilityController extends Controller
 {
@@ -18,35 +19,46 @@ class BuildingFacilityController extends Controller
         $buildings = Building::all();
 
         // Ambil fasilitas indoor
-        $indoorFacilities = BuildingFacility::with('building:id,building_name', 'repairReports')
-            ->where('location', 'indoor')
+        $facilities = BuildingFacility::with('building:id,building_name', 'repairReports')
             ->get();
 
-        // Ambil fasilitas outdoor
-        $outdoorFacilities = BuildingFacility::with('building:id,building_name', 'repairReports')
-            ->where('location', 'outdoor')
-            ->get();
-
-        return view('admin.dataFasilitasGedungAdmin', compact('buildings', 'indoorFacilities', 'outdoorFacilities'));
+        return view('admin.dataFasilitasGedungAdmin', compact('buildings', 'facilities'));
     }
 
 
     /**
      * Show the form for creating a new resource.
      */
+
     public function create(Request $request)
     {
-        // Validasi data input
         $validatedData = $request->validate([
-            'id_building'   => 'required|integer|exists:building,id',
-            'facility_name' => 'required|string|max:255',
-            'location'      => 'required|string|max:255',
-            'description'   => 'nullable|string'
+            'id_building' => [
+                'required',
+                'integer',
+                'exists:building,id'
+            ],
+            'facility_name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('building_facility')->where(function ($query) use ($request) {
+                    return $query->where('id_building', $request->id_building);
+                }),
+            ],
+            'location' => 'required|string|max:255',
+            'description' => 'nullable|string',
+        ], [
+            'facility_name.unique' => 'Nama fasilitas untuk gedung ini sudah ada, silakan gunakan nama lain.',
+            'id_building.required' => 'Gedung wajib dipilih.',
+            'facility_name.required' => 'Nama fasilitas wajib diisi.',
+            'location.required' => 'Lokasi fasilitas wajib diisi.',
         ]);
 
+        // Simpan ke database
         BuildingFacility::create($validatedData);
 
-        return redirect('/admin-data-fasilitas-gedung')->with('success', 'Data gedung berhasil ditambahkan.');
+        return response()->json(['message' => 'Fasilitas berhasil ditambahkan.']);
     }
 
 

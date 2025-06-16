@@ -6,7 +6,7 @@
 </head>
 
 @section('content')
-<div class="px-4 sm:px-6 mt-20">
+<div class="px-4 sm:px-6">
     <!-- Container besar untuk latar belakang -->
     <div class="bg-white shadow-lg rounded-xl p-6">
         <!-- Header Dashboard -->

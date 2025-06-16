@@ -7,7 +7,7 @@
 
 @section('content')
 
-<div class="p-8 mt-20">
+<div class="p-8">
     <div class="bg-white rounded-md w-full py-10 px-10">
         <h1 class="text-primary font-bold text-xl mb-4">Daftar Keluhan</h1>
         <hr class="border-black mb-6">
@@ -107,81 +107,81 @@
 
 @push('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    const modal = document.getElementById('detailModal');
-    const rows = document.querySelectorAll('.detailRow');
+    document.addEventListener('DOMContentLoaded', () => {
+        const modal = document.getElementById('detailModal');
+        const rows = document.querySelectorAll('.detailRow');
 
-    rows.forEach(row => {
-        row.addEventListener('click', () => {
-            const email = row.getAttribute('data-email');
-            const deskripsi = row.getAttribute('data-deskripsi');
-            const report = row.getAttribute('data-report');
-            const gedung = row.getAttribute('data-building');
+        rows.forEach(row => {
+            row.addEventListener('click', () => {
+                const email = row.getAttribute('data-email');
+                const deskripsi = row.getAttribute('data-deskripsi');
+                const report = row.getAttribute('data-report');
+                const gedung = row.getAttribute('data-building');
 
-            document.getElementById('modalEmail').textContent = email;
-            document.getElementById('modalDeskripsi').textContent = deskripsi;
-            document.getElementById('modalReportId').textContent = report;
-            document.getElementById('modalGedung').textContent = gedung;
+                document.getElementById('modalEmail').textContent = email;
+                document.getElementById('modalDeskripsi').textContent = deskripsi;
+                document.getElementById('modalReportId').textContent = report;
+                document.getElementById('modalGedung').textContent = gedung;
 
-            document.getElementById('shortcutLink').setAttribute('href',
-                `/admin-daftar-permintaan-perbaikan?id=${report}`);
+                document.getElementById('shortcutLink').setAttribute('href',
+                    `/admin-daftar-permintaan-perbaikan?id=${report}`);
 
-            modal.classList.remove('hidden');
+                modal.classList.remove('hidden');
+            });
         });
     });
-});
 
-function closeModal() {
-    document.getElementById('detailModal').classList.add('hidden');
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    // Ambil elemen input dan tbody
-    const searchInput = document.getElementById('search');
-    const entriesInput = document.getElementById('entries');
-    const tableBody = document.getElementById('keluhanBody');
-    const rows = Array.from(tableBody.querySelectorAll('tr'));
-
-    function filterTable() {
-        const searchTerm = searchInput.value.toLowerCase();
-        const entriesCount = parseInt(entriesInput.value) || 10;
-
-        // Filter rows sesuai keyword pencarian
-        const filteredRows = rows.filter(row => {
-            return row.textContent.toLowerCase().includes(searchTerm);
-        });
-
-        // Kosongkan tbody dulu
-        tableBody.innerHTML = '';
-
-        // Tampilkan sesuai jumlah entries yang dipilih
-        filteredRows.slice(0, entriesCount).forEach(row => {
-            tableBody.appendChild(row);
-        });
+    function closeModal() {
+        document.getElementById('detailModal').classList.add('hidden');
     }
 
-    // Event ketika user ketik di search
-    searchInput.addEventListener('input', () => {
-        filterTable();
-    });
+    document.addEventListener('DOMContentLoaded', () => {
+        // Ambil elemen input dan tbody
+        const searchInput = document.getElementById('search');
+        const entriesInput = document.getElementById('entries');
+        const tableBody = document.getElementById('keluhanBody');
+        const rows = Array.from(tableBody.querySelectorAll('tr'));
 
-    // Event ketika user ubah jumlah entries
-    entriesInput.addEventListener('input', () => {
-        // Minimal 1 entry
-        if (entriesInput.value < 1) {
-            entriesInput.value = 1;
+        function filterTable() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const entriesCount = parseInt(entriesInput.value) || 10;
+
+            // Filter rows sesuai keyword pencarian
+            const filteredRows = rows.filter(row => {
+                return row.textContent.toLowerCase().includes(searchTerm);
+            });
+
+            // Kosongkan tbody dulu
+            tableBody.innerHTML = '';
+
+            // Tampilkan sesuai jumlah entries yang dipilih
+            filteredRows.slice(0, entriesCount).forEach(row => {
+                tableBody.appendChild(row);
+            });
         }
+
+        // Event ketika user ketik di search
+        searchInput.addEventListener('input', () => {
+            filterTable();
+        });
+
+        // Event ketika user ubah jumlah entries
+        entriesInput.addEventListener('input', () => {
+            // Minimal 1 entry
+            if (entriesInput.value < 1) {
+                entriesInput.value = 1;
+            }
+            filterTable();
+        });
+
+        // Panggil pertama kali agar sesuai default input dan tampil
         filterTable();
     });
-
-    // Panggil pertama kali agar sesuai default input dan tampil
-    filterTable();
-});
 </script>
 
 @endpush
 
 <script>
-const complaint = @json($Complaints);
-console.log(complaint)
+    const complaint = @json($Complaints);
+    console.log(complaint)
 </script>

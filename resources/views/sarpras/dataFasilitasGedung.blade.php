@@ -6,7 +6,7 @@
 </head>
 
 @section('content')
-<div class="p-4 md:p-8 mt-20">
+<div class="p-4 md:p-8">
     <div class="bg-white rounded-md w-full py-6 md:py-10 px-4 md:px-10">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 space-y-4 md:space-y-0">
             <h1 class="text-primary font-bold text-xl">Daftar Fasilitas Gedung</h1>
@@ -21,56 +21,31 @@
             <div class="flex flex-col md:flex-row md:space-x-8 space-y-6 md:space-y-0">
                 <!-- Indoor Facilities -->
                 <div class="w-full overflow-x-auto">
-                    <h2 class="text-lg font-bold text-primary mb-2">Indoor</h2>
+                    <h2 class="text-lg font-bold text-primary mb-2">Daftar Fasilitas Gedung</h2>
                     <table class="table min-w-[500px] w-full text-sm text-left text-gray-600 border"
                         id="indoorFacilitiesTable">
                         <thead class="bg-primary text-xs uppercase text-white">
                             <tr>
                                 <th class="px-6 py-3">Gedung</th>
+                                <th class="px-6 py-3">Lokasi</th>
                                 <th class="px-3 py-3">Nama Fasilitas</th>
                                 <th class="px-3 py-3">Deskripsi</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($indoorFacilities as $facility)
+                            @foreach ($facilities as $facility)
                             <tr class="facility-row hover:bg-gray-100 cursor-pointer"
                                 onclick="showFacilityDetails({{ $facility->id }})" data-id="{{ $facility->id }}"
                                 data-name="{{ strtolower($facility->facility_name) }}"
                                 data-description="{{ strtolower($facility->description) }}">
                                 <td class="px-6 py-3 whitespace-nowrap">{{ $facility->building->building_name }}</td>
+                                <td class="px-6 py-3">{{ $facility->location}}</td>
                                 <td class="px-3 py-3 whitespace-nowrap">{{ $facility->facility_name }}</td>
                                 <td class="px-3 py-3">{{ $facility->description }}</td>
                             </tr>
                             @endforeach
                         </tbody>
 
-                    </table>
-                </div>
-
-                <!-- Outdoor Facilities -->
-                <div class="w-full overflow-x-auto">
-                    <h2 class="text-lg font-bold text-primary mb-2">Outdoor</h2>
-                    <table class="table min-w-[500px] w-full text-sm text-left text-gray-600 border"
-                        id="outdoorFacilitiesTable">
-                        <thead class="bg-primary text-xs uppercase text-white">
-                            <tr>
-                                <th class="px-6 py-3">Gedung</th>
-                                <th class="px-3 py-3">Nama Fasilitas</th>
-                                <th class="px-3 py-3">Deskripsi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($outdoorFacilities as $facility)
-                            <tr class="facility-row hover:bg-gray-100 cursor-pointer"
-                                onclick="showFacilityDetails({{ $facility->id }})" data-id="{{ $facility->id }}"
-                                data-name="{{ strtolower($facility->facility_name) }}"
-                                data-description="{{ strtolower($facility->description) }}">
-                                <td class="px-6 py-3 whitespace-nowrap">{{ $facility->building->building_name }}</td>
-                                <td class="px-3 py-3 whitespace-nowrap">{{ $facility->facility_name }}</td>
-                                <td class="px-3 py-3">{{ $facility->description }}</td>
-                            </tr>
-                            @endforeach
-                        </tbody>
                     </table>
                 </div>
             </div>

@@ -17,4 +17,10 @@ class Technician extends Model
         'email',
         'phone_number'
     ];
+
+
+    public function repairReports()
+    {
+        return $this->belongsToMany(RepairReport::class, 'repair_technicians', 'id_technisian', 'id_report');
+    }
 }

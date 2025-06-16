@@ -92,4 +92,9 @@ class RepairReport extends Model
     {
         return $this->hasMany(Complaint::class, 'id_report');
     }
+
+    public function technicians()
+    {
+        return $this->belongsToMany(Technician::class, 'repair_technicians', 'id_report', 'id_technisian');
+    }
 }

@@ -34,18 +34,31 @@ class RoomFacilityController extends Controller
             'facility_name' => 'required|string|max:255',
             'number_units' => 'nullable|integer',
             'description' => 'nullable|string',
+        ], [
+            'id_room.required' => 'Ruangan wajib dipilih.',
+            'facility_name.required' => 'Nama fasilitas wajib diisi.',
         ]);
 
-        // Menyimpan data ruangan baru
+        // Cek apakah kombinasi ruangan dan fasilitas sudah ada
+        $exists = RoomFacility::where('id_room', $request->id_room)
+            ->where('facility_name', $request->facility_name)
+            ->exists();
+
+        if ($exists) {
+            return response()->json([
+                'message' => 'Fasilitas dengan nama yang sama sudah terdaftar pada ruangan ini.'
+            ], 422); // 422 = Unprocessable Entity
+        }
+
+        // Simpan data jika belum ada
         RoomFacility::create([
             'id_room' => $request->id_room,
             'facility_name' => $request->facility_name,
-            'room_type' => $request->room_type,
             'number_units' => $request->number_units,
             'description' => $request->description,
         ]);
 
-        return redirect('/admin-data-fasilitas-ruang')->with('success', 'Ruangan berhasil ditambahkan.');
+        return response()->json(['message' => 'Fasilitas ruangan berhasil ditambahkan.']);
     }
 
     /**

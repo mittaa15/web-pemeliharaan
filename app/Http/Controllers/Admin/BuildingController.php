@@ -8,8 +8,10 @@ use App\Models\Notification;
 use App\Models\RoomFacility;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 
 
 class BuildingController extends Controller
@@ -26,20 +28,41 @@ class BuildingController extends Controller
      */
     public function create(Request $request)
     {
-        $request->validate([
-            'building_name' => 'required|string|max:255',
+        $validator = Validator::make($request->all(), [
+            'building_name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('building', 'building_name'),
+            ],
             'description' => 'nullable|string',
+        ], [
+            'building_name.required' => 'Nama gedung wajib diisi.',
+            'building_name.unique' => 'Nama gedung sudah ada dalam data.',
         ]);
 
-        // Simpan ke database
-        Building::create([
-            'building_name' => $request->building_name,
-            'description' => $request->description,
-        ]);
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => $validator->errors()->first()
+            ], 422); // error validasi dikembalikan seperti changePassword
+        }
 
-        // Redirect atau responreturn 
-        return redirect('/admin-data-gedung')->with('success', 'Data gedung berhasil ditambahkan.');
+        try {
+            Building::create([
+                'building_name' => $request->building_name,
+                'description' => $request->description,
+            ]);
+
+            return response()->json([
+                'message' => 'Gedung berhasil ditambahkan.'
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Terjadi kesalahan saat menyimpan data.'
+            ], 500);
+        }
     }
+
 
     /**
      * Store a newly created resource in storage.

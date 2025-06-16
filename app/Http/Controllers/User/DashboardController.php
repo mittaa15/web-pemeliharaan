@@ -120,8 +120,14 @@ class DashboardController extends Controller
             'building',
             'buildingFacility',
             'histories',
-            'schedules'
-        ])->where('id_user', $userId)->whereIn('status', ['Selesai', 'Ditolak', 'Dibatalkan'])->orderBy('created_at', 'desc')->get();
+            'schedules',
+            'technicians' // ⬅️ tambahan relasi teknisi
+        ])
+            ->where('id_user', $userId)
+            ->whereIn('status', ['Selesai', 'Ditolak', 'Dibatalkan'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
         return view('user.riwayatLaporanPerbaikan', compact('RepairReports'));
     }
 }

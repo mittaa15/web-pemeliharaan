@@ -7,7 +7,7 @@
 
 @section('content')
 
-<div class="px-4 sm:px-6 md:px-8 mt-20">
+<div class="px-4 sm:px-6 md:px-8">
     <div class="bg-white rounded-md w-full py-6 px-4 md:px-10">
         <h1 class="text-primary font-bold text-lg sm:text-xl mb-4">Daftar Keluhan</h1>
         <hr class="border-black mb-6">

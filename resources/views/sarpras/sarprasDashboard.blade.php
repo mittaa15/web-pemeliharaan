@@ -6,7 +6,7 @@
 </head>
 
 @section('content')
-<div class="w-full max-w-screen-xl mx-auto px-3 sm:px-4 mt-20">
+<div class="w-full max-w-screen-xl mx-auto px-3 sm:px-4">
     <div class="bg-white p-4 sm:p-8 rounded-xl shadow-md w-full">
         <div class="mb-8">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between">
