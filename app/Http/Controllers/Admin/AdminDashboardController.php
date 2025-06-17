@@ -156,6 +156,7 @@ class AdminDashboardController extends Controller
     {
         $request->validate([
             'id_report' => 'required|exists:repair_report,id',
+            'id_user' => 'required|exists:users,id',
             'nama_teknisi' => 'required|array|min:1',
             'nama_teknisi.*' => 'exists:technicians,id',
             'deskripsi_pekerjaan' => 'required|string|max:1000',
@@ -192,6 +193,12 @@ class AdminDashboardController extends Controller
                 'status' => 'Selesai',
                 'complete_date' => Carbon::now(),
             ]);
+
+            Notification::createNotification(
+                $dupReport->id_user,
+                'Laporan Anda diupdate menjadi Selesai',
+                'Silakan periksa halaman daftar laporan Anda.'
+            );
         }
 
         return redirect()->back()->with('success', 'Laporan berhasil diperbarui dengan teknisi untuk semua laporan terkait.');

@@ -288,37 +288,38 @@
     </div>
 </div>
 
-<div id="teknisiModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
-    <div class="bg-white w-full max-w-md rounded-lg shadow-lg p-6 mx-4">
+<div id="teknisiModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black bg-opacity-50">
+    <div class="w-full max-w-md p-6 mx-4 bg-white rounded-lg shadow-lg">
         <form action="{{ route('create-teknisi-sarpras') }}" method="POST">
             @csrf
             <input type="hidden" name="id_report" id="teknisiReportId">
-            <h2 class="text-lg font-bold mb-4 text-primary">Isi Nama Penanggung Jawab (Teknisi)</h2>
+            <input type="hidden" name="id_user" id="teknisiUserId">
+            <h2 class="mb-4 text-lg font-bold text-primary">Isi Nama Penanggung Jawab (Teknisi)</h2>
             <div id="teknisiSelectContainer">
-                <div class="teknisi-select-group mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Teknisi</label>
-                    <select name="nama_teknisi[]" required class="input w-full bg-gray-100 text-black">
+                <div class="mb-4 teknisi-select-group">
+                    <label class="block mb-1 text-sm font-medium text-gray-700">Nama Teknisi</label>
+                    <select name="nama_teknisi[]" required class="w-full text-black bg-gray-100 input">
                         <option value="" disabled selected>-- Pilih Teknisi --</option>
                         @foreach ($TeknisiLists as $teknisi)
                         <option value="{{ $teknisi->id }}">{{ $teknisi->name }}</option>
                         @endforeach
                     </select>
                 </div>
-                <button type="button" class="remove-btn hidden text-red-500 font-bold text-lg"
+                <button type="button" class="hidden text-lg font-bold text-red-500 remove-btn"
                     onclick="removeTeknisiField(this)">×</button>
             </div>
             <button type="button" onclick="addTeknisiSelect()" class="mb-4 text-sm text-blue-600 hover:underline">+
                 Tambah Teknisi</button>
             <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi Pekerjaan</label>
+                <label class="block mb-1 text-sm font-medium text-gray-700">Deskripsi Pekerjaan</label>
                 <textarea name="deskripsi_pekerjaan" required
-                    class="w-full border border-gray-300 rounded p-2 bg-white text-gray-700" rows="4"
+                    class="w-full p-2 text-gray-700 bg-white border border-gray-300 rounded" rows="4"
                     placeholder="Masukkan deskripsi pekerjaan..."></textarea>
             </div>
             <div class="flex justify-end gap-3">
                 <button type="button" onclick="closeTeknisiModal('teknisiModal')"
-                    class="px-4 py-2 rounded bg-gray-300 text-black">Batal</button>
-                <button type="submit" class="px-4 py-2 rounded bg-green-500 text-white">Simpan</button>
+                    class="px-4 py-2 text-black bg-gray-300 rounded">Batal</button>
+                <button type="submit" class="px-4 py-2 text-white bg-green-500 rounded">Simpan</button>
             </div>
         </form>
     </div>
@@ -510,51 +511,41 @@
         let opsiStatus = '';
         if (laporan.status !== 'Diproses') {
             opsiStatus = `
-        <tr>
-            <td colspan="2" class="px-6 py-3 text-right">
-                <form action="${updateStatusUrl}" method="POST">
-                    <input type="hidden" name="_token" value="${csrfToken}">
-                    <input type="hidden" name="id_report" value="${laporan.id}">
-                    <input type="hidden" name="id_user" value="${laporan.id_user}">
-                    <select name="status" onchange="handleStatusChange(this, ${laporan.id})" class="border rounded px-2 py-1 bg-white">
-                        <option value="">Ubah Status</option>
-                        <option value="Dalam proses pengerjaan" ${laporan.status === 'Dalam proses pengerjaan' ? 'selected' : ''}>Dalam proses pengerjaan</option>
-                        <option value="Pengecekan akhir" ${laporan.status === 'Pengecekan akhir' ? 'selected' : ''}>Pengecekan akhir</option>
-                        <option value="Selesai" ${laporan.status === 'Selesai' ? 'selected' : ''}>Selesai</option>
-                    </select>
-                </form>
-            </td>
-        </tr>
-        `;
+            <tr>
+                <td colspan="2" class="px-6 py-3 text-right">
+                    <form action="${updateStatusUrl}" method="POST">
+                        <input type="hidden" name="_token" value="${csrfToken}">
+                        <input type="hidden" name="id_report" value="${laporan.id}">
+                        <input type="hidden" name="id_user" value="${laporan.id_user}">
+                        <select name="status" onchange="handleStatusChange(this, ${laporan.id}, ${laporan.id_user})" class="px-2 py-1 bg-white border rounded">
+                            <option value="">Ubah Status</option>
+                            <option value="Dalam proses pengerjaan" ${laporan.status === 'Dalam proses pengerjaan' ? 'selected' : ''}>Dalam proses pengerjaan</option>
+                            <option value="Pengecekan akhir" ${laporan.status === 'Pengecekan akhir' ? 'selected' : ''}>Pengecekan akhir</option>
+                            <option value="Selesai" ${laporan.status === 'Selesai' ? 'selected' : ''}>Selesai</option>
+                        </select>
+                    </form>
+                </td>
+            </tr>
+            `;
         }
 
-        // Ambil history dengan status "Pengecekan akhir"
-        const pengecekanAkhirHistory = laporan.histories?.find(
-            (item) => item.status === "Pengecekan akhir"
-        );
-
-        // Ambil foto perbaikan jika ada di status "Pengecekan akhir"
-        const repairPhoto = pengecekanAkhirHistory?.damage_photo ?
-            `<img src="/storage/${pengecekanAkhirHistory.damage_photo}" alt="Foto Perbaikan" class="max-w-xs max-h-48 rounded border border-gray-300 bukti-preview cursor-pointer" />` :
-            '-';
-
         document.getElementById('detailContent').innerHTML = `
-        <tr><td class="px-6 py-3 font-semibold">Nomor Pengajuan</td><td class="px-6 py-3">${String(laporan.id).padStart(4, '0')}</td></tr>
-        <tr><td class="px-6 py-3 font-semibold">Pengirim Laporan</td><td class="px-6 py-3">${laporan.user?.email ?? '-'}</td></tr>
-        <tr><td class="px-6 py-3 font-semibold">Status Laporan Terkini</td><td class="px-6 py-3">${laporan.status}</td></tr>
-        <tr><td class="px-6 py-3 font-semibold">Tanggal Diajukan</td><td class="px-6 py-3">${formatDateUTC(laporan.created_at)}</td></tr>
-        <tr><td class="px-6 py-3 font-semibold">Gedung</td><td class="px-6 py-3">${laporan.building?.building_name ?? '-'}</td></tr>
-        <tr><td class="px-6 py-3 font-semibold">Ruangan</td><td class="px-6 py-3">${laporan.room?.room_name ?? '-'}</td></tr>
-        <tr><td class="px-6 py-3 font-semibold">Fasilitas Gedung</td><td class="px-6 py-3">${laporan.building_facility?.facility_name ?? '-'}</td></tr>
-        <tr><td class="px-6 py-3 font-semibold">Fasilitas Ruangan</td><td class="px-6 py-3">${laporan.room_facility?.facility_name ?? '-'}</td></tr>
-        <tr><td class="px-6 py-3 font-semibold">Dampak Kerusakan</td><td class="px-6 py-3">${laporan.damage_impact}</td></tr>
-        <tr><td class="px-6 py-3 font-semibold">Bukti Kerusakan</td><td class="px-6 py-3">${laporan.damage_photo? `<img src="/storage/${laporan.damage_photo}" alt="Bukti Kerusakan" class="max-w-xs max-h-48 rounded border border-gray-300 bukti-preview cursor-pointer" />` : '-'}</td></tr>
-        <tr><td class="px-6 py-3 font-semibold">Foto Perbaikan</td><td class="px-6 py-3">${repairPhoto}</td></tr>
-        <tr><td class="px-6 py-3 font-semibold">Deskripsi Kerusakan</td><td class="px-6 py-3">${laporan.damage_description}</td></tr>
-        <tr><td class="px-6 py-3 font-semibold">Tanggal Perbaikan</td><td class="px-6 py-3">${laporan.schedules?.repair_date ?? '-'}</td></tr>
-        ${ekstra}
-        ${opsiStatus}
-    `;
+            <tr><td class="px-6 py-3 font-semibold">Nomor Pengajuan</td><td class="px-6 py-3">${String(laporan.id).padStart(4, '0')}</td></tr>
+            <tr><td class="px-6 py-3 font-semibold">Pengirim Laporan</td><td class="px-6 py-3">${laporan.user?.email ?? '-'}</td></tr>
+            <tr><td class="px-6 py-3 font-semibold">Status Laporan Terkini</td><td class="px-6 py-3">${laporan.status}</td></tr>
+            <tr><td class="px-6 py-3 font-semibold">Tanggal Diajukan</td><td class="px-6 py-3">${formatDateUTC(laporan.created_at)}</td></tr>
+            <tr><td class="px-6 py-3 font-semibold">Gedung</td><td class="px-6 py-3">${laporan.building?.building_name ?? '-'}</td></tr>
+            <tr><td class="px-6 py-3 font-semibold">Ruangan</td><td class="px-6 py-3">${laporan.room?.room_name ?? '-'}</td></tr>
+            <tr><td class="px-6 py-3 font-semibold">Fasilitas Gedung</td><td class="px-6 py-3">${laporan.building_facility?.facility_name ?? '-'}</td></tr>
+            <tr><td class="px-6 py-3 font-semibold">Fasilitas Ruangan</td><td class="px-6 py-3">${laporan.room_facility?.facility_name ?? '-'}</td></tr>
+            <tr><td class="px-6 py-3 font-semibold">Dampak Kerusakan</td><td class="px-6 py-3">${laporan.damage_impact}</td></tr>
+            <tr><td class="px-6 py-3 font-semibold">Bukti Kerusakan</td><td class="px-6 py-3">${laporan.damage_photo? `<img src="/storage/${laporan.damage_photo}" alt="Bukti Kerusakan" class="max-w-xs border border-gray-300 rounded cursor-pointer max-h-48 bukti-preview" />` : '-'}</td></tr>
+            <tr><td class="px-6 py-3 font-semibold">Foto Perbaikan</td><td class="px-6 py-3">${laporan.latest_history?.damage_photo ? `<img src="/storage/${laporan.latest_history.damage_photo}" alt="Foto Perbaikan" class="max-w-xs border border-gray-300 rounded cursor-pointer max-h-48 bukti-preview" />` : '-'}</td></tr>
+            <tr><td class="px-6 py-3 font-semibold">Deskripsi Kerusakan</td><td class="px-6 py-3">${laporan.damage_description}</td></tr>
+            <tr><td class="px-6 py-3 font-semibold">Tanggal Perbaikan</td><td class="px-6 py-3">${laporan.schedules?.repair_date ?? '-'}</td></tr>
+            ${ekstra}
+            ${opsiStatus}
+        `;
 
         document.getElementById('approveButton').setAttribute('data-id-report', laporan.id);
         document.getElementById('approveButton').setAttribute('data-id-user', laporan.id_user);
@@ -692,14 +683,16 @@
         document.getElementById(modalId).classList.add('hidden');
     }
 
-    function handleStatusChange(selectEl, reportId) {
+    function handleStatusChange(selectEl, reportId, userId) {
         const status = selectEl.value;
 
         if (status === "Pengecekan akhir") {
             document.getElementById('repairReportId').value = reportId;
+            document.getElementById('userIdRepair').value = userId;
             openModal('repairModal');
         } else if (status === "Selesai") {
             document.getElementById('teknisiReportId').value = reportId;
+            document.getElementById('teknisiUserId').value = userId;
             openModal('teknisiModal');
         } else {
             selectEl.form.submit();
