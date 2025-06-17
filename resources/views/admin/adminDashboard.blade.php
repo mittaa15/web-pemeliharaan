@@ -20,57 +20,57 @@
     @endphp
 
     <style>
-        .status-cell[data-status="Diproses"] {
-            background-color: #DBEAFE;
-            color: #1E40AF;
-        }
+    .status-cell[data-status="Diproses"] {
+        background-color: #DBEAFE;
+        color: #1E40AF;
+    }
 
-        .status-cell[data-status="Ditolak"] {
-            background-color: #FECACA;
-            color: #991B1B;
-        }
+    .status-cell[data-status="Ditolak"] {
+        background-color: #FECACA;
+        color: #991B1B;
+    }
 
-        .status-cell[data-status="Dijadwalkan"] {
-            background-color: #E0E7FF;
-            color: #3730A3;
-        }
+    .status-cell[data-status="Dijadwalkan"] {
+        background-color: #E0E7FF;
+        color: #3730A3;
+    }
 
-        .status-cell[data-status="Dalam proses pengerjaan"] {
-            background-color: #FEF3C7;
-            color: #92400E;
-        }
+    .status-cell[data-status="Dalam proses pengerjaan"] {
+        background-color: #FEF3C7;
+        color: #92400E;
+    }
 
-        .status-cell[data-status="Pengecekan akhir"] {
-            background-color: #EDE9FE;
-            color: #6B21A8;
-        }
+    .status-cell[data-status="Pengecekan akhir"] {
+        background-color: #EDE9FE;
+        color: #6B21A8;
+    }
 
-        .status-cell[data-status="Selesai"] {
-            background-color: #D1FAE5;
-            color: #065F46;
-        }
+    .status-cell[data-status="Selesai"] {
+        background-color: #D1FAE5;
+        color: #065F46;
+    }
 
-        /* Membuat tabel responsif: 
+    /* Membuat tabel responsif:
        Scroll horizontal hanya di layar >= md (768px) */
-        @media (min-width: 768px) {
-            .table-responsive {
-                overflow-x: auto;
-            }
+    @media (min-width: 768px) {
+        .table-responsive {
+            overflow-x: auto;
+        }
+    }
+
+    /* Di layar kecil, padding dan font lebih kecil supaya muat */
+    @media (max-width: 767px) {
+        table {
+            font-size: 0.75rem;
+            /* 12px */
         }
 
-        /* Di layar kecil, padding dan font lebih kecil supaya muat */
-        @media (max-width: 767px) {
-            table {
-                font-size: 0.75rem;
-                /* 12px */
-            }
-
-            th,
-            td {
-                padding: 0.5rem 0.75rem;
-                /* padding lebih kecil */
-            }
+        th,
+        td {
+            padding: 0.5rem 0.75rem;
+            /* padding lebih kecil */
         }
+    }
     </style>
 
     <!-- Wrapper dengan background putih -->
@@ -103,7 +103,8 @@
         <!-- 5 Laporan Terakhir -->
         <div class="mt-10">
             <h3 class="text-lg md:text-xl font-semibold text-gray-800 mb-4">5 Laporan Terakhir</h3>
-            <div class="table-responsive bg-white shadow rounded-lg">
+
+            <div class="overflow-x-auto bg-white shadow rounded-lg">
                 <table class="min-w-full text-sm text-left text-gray-700">
                     <thead class="bg-primary text-white uppercase text-xs">
                         <tr>
@@ -117,16 +118,17 @@
                     <tbody>
                         @forelse ($laporanTerakhir as $index => $laporan)
                         <tr class="border-b">
-                            <td class="px-4 py-4">{{ $index + 1 }}</td>
-                            <td class="px-4 py-4">{{ str_pad($laporan->id, 4, '0', STR_PAD_LEFT) }}</td>
-                            <td class="px-4 py-4">{{ $laporan->user->email ?? '-' }}</td>
+                            <td class="px-4 py-4 whitespace-nowrap">{{ $index + 1 }}</td>
+                            <td class="px-4 py-4 whitespace-nowrap">{{ str_pad($laporan->id, 4, '0', STR_PAD_LEFT) }}
+                            </td>
+                            <td class="px-4 py-4 whitespace-nowrap">{{ $laporan->user->email ?? '-' }}</td>
                             <td class="px-4 py-4">
                                 <span class="status-cell text-xs font-semibold px-2.5 py-0.5 rounded"
                                     data-status="{{ $laporan->status }}">
                                     {{ ucfirst($laporan->status) }}
                                 </span>
                             </td>
-                            <td class="px-4 py-4">
+                            <td class="px-4 py-4 whitespace-nowrap">
                                 {{ \Carbon\Carbon::parse($laporan->created_at)->format('d M Y') }}
                             </td>
                         </tr>
@@ -139,6 +141,7 @@
                 </table>
             </div>
         </div>
+
 
     </div> <!-- Penutup bg putih -->
 </div>

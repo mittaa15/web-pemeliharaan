@@ -20,23 +20,22 @@ default: return 'bg-gray-100 text-gray-800';
 
 
 @section('content')
-<div class="px-4 sm:px-8 py-6 w-full overflow-x-auto"
-    style="touch-action: pan-x pan-y; -webkit-overflow-scrolling: touch;">
+<div class="container mx-auto px-4 mb-8">
     @if(session('success'))
     <div id="success-alert" class="bg-green-100 text-green-800 flex justify-center p-2 mb-4 rounded">
         {{ session('success') }}
     </div>
     <script>
-        setTimeout(() => {
-            const alertBox = document.getElementById('success-alert');
-            if (alertBox) {
-                alertBox.style.display = 'none';
-            }
-        }, 3000);
+    setTimeout(() => {
+        const alertBox = document.getElementById('success-alert');
+        if (alertBox) {
+            alertBox.style.display = 'none';
+        }
+    }, 3000);
     </script>
     @endif
 
-    <div class="bg-white rounded-md w-full py-10 px-10 min-w-[700px]">
+    <div class="bg-white rounded-md w-full py-10 px-10">
         <h1 class="text-primary font-bold text-xl mb-4">Daftar Permintaan Laporan</h1>
         <hr class="border-black mb-6">
 
@@ -55,40 +54,42 @@ default: return 'bg-gray-100 text-gray-800';
         </div>
 
         <div class="overflow-x-auto">
-            <table class="table w-full text-xs md:text-sm text-left text-gray-600 min-w-[600px]">
-                <thead class="text-xs text-white uppercase bg-primary">
-                    <tr>
-                        <th class="px-6 py-3">No</th>
-                        <th class="px-6 py-3">Nomor Pengajuan</th>
-                        <th class="px-6 py-3">Gedung</th>
-                        <th class="px-6 py-3">Status</th>
-                        <th class="px-6 py-3">Waktu Pembuatan</th>
-                        <th class="px-6 py-3">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody id="laporanTableBody">
-                    @foreach($RepairReports as $index => $report)
-                    <tr>
-                        <td class="px-6 py-3">{{ $index + 1 }}</td>
-                        <td class="px-6 py-3">{{ str_pad($report->id, 4, '0', STR_PAD_LEFT) }}</td>
-                        <td class="px-6 py-3">{{ $report->building->building_name ?? '-' }}</td>
-                        <td class="px-6 py-3">
-                            <span
-                                class="status-cell text-xs font-semibold px-2.5 py-0.5 rounded {{ getStatusClass($report->status) }}">
-                                {{ $report->status }}
-                            </span>
-                        </td>
-                        <td class="px-6 py-3">{{ $report->created_at->format('d M Y') }}</td>
-                        <td class="px-6 py-3">
-                            <button class="text-blue-600 hover:underline detailBtn"
-                                onclick="showDetail('{{ $report->id }}')">
-                                Detail
-                            </button>
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
+            <div class="table-responsive bg-white shadow rounded-lg">
+                <table class="min-w-full text-sm text-left text-gray-700">
+                    <thead class="text-xs text-white uppercase bg-primary">
+                        <tr>
+                            <th class="px-6 py-3">No</th>
+                            <th class="px-6 py-3">Nomor Pengajuan</th>
+                            <th class="px-6 py-3">Gedung</th>
+                            <th class="px-6 py-3">Status</th>
+                            <th class="px-6 py-3">Waktu Pembuatan</th>
+                            <th class="px-6 py-3">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="laporanTableBody">
+                        @foreach($RepairReports as $index => $report)
+                        <tr>
+                            <td class="px-6 py-3">{{ $index + 1 }}</td>
+                            <td class="px-6 py-3">{{ str_pad($report->id, 4, '0', STR_PAD_LEFT) }}</td>
+                            <td class="px-6 py-3">{{ $report->building->building_name ?? '-' }}</td>
+                            <td class="px-6 py-3">
+                                <span
+                                    class="status-cell text-xs font-semibold px-2.5 py-0.5 rounded {{ getStatusClass($report->status) }}">
+                                    {{ $report->status }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-3">{{ $report->created_at->format('d M Y') }}</td>
+                            <td class="px-6 py-3">
+                                <button class="text-blue-600 hover:underline detailBtn"
+                                    onclick="showDetail('{{ $report->id }}')">
+                                    Detail
+                                </button>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <div class="flex justify-end mt-2">
@@ -276,217 +277,217 @@ default: return 'bg-gray-100 text-gray-800';
 
 @section('scripts')
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('DOM fully loaded and parsed');
-        const tableBody = document.getElementById('laporanTableBody');
-        const entriesInput = document.getElementById('entries');
-        const searchInput = document.getElementById('search');
-        const prevBtn = document.getElementById('prevPageBtn');
-        const nextBtn = document.getElementById('nextPageBtn');
-        console.log('laporanTableBody element:', tableBody);
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM fully loaded and parsed');
+    const tableBody = document.getElementById('laporanTableBody');
+    const entriesInput = document.getElementById('entries');
+    const searchInput = document.getElementById('search');
+    const prevBtn = document.getElementById('prevPageBtn');
+    const nextBtn = document.getElementById('nextPageBtn');
+    console.log('laporanTableBody element:', tableBody);
 
-        console.log('entriesInput element:', entriesInput);
+    console.log('entriesInput element:', entriesInput);
 
-        let currentPage = 1;
-        let entriesPerPage = parseInt(entriesInput.value) || 8;
+    let currentPage = 1;
+    let entriesPerPage = parseInt(entriesInput.value) || 8;
 
-        const allRows = Array.from(tableBody.querySelectorAll('tr')).filter(
-            row => !row.classList.contains('empty-row')
-        );
+    const allRows = Array.from(tableBody.querySelectorAll('tr')).filter(
+        row => !row.classList.contains('empty-row')
+    );
 
-        function getFilteredRows() {
-            const keyword = searchInput.value.toLowerCase();
-            return allRows.filter(row => row.textContent.toLowerCase().includes(keyword));
-        }
+    function getFilteredRows() {
+        const keyword = searchInput.value.toLowerCase();
+        return allRows.filter(row => row.textContent.toLowerCase().includes(keyword));
+    }
 
-        function renderTable() {
-            const filteredRows = getFilteredRows();
-            const totalPages = Math.ceil(filteredRows.length / entriesPerPage);
+    function renderTable() {
+        const filteredRows = getFilteredRows();
+        const totalPages = Math.ceil(filteredRows.length / entriesPerPage);
 
-            if (currentPage > totalPages) currentPage = totalPages;
-            if (currentPage < 1) currentPage = 1;
+        if (currentPage > totalPages) currentPage = totalPages;
+        if (currentPage < 1) currentPage = 1;
 
-            const start = (currentPage - 1) * entriesPerPage;
-            const end = start + entriesPerPage;
+        const start = (currentPage - 1) * entriesPerPage;
+        const end = start + entriesPerPage;
 
-            tableBody.innerHTML = '';
+        tableBody.innerHTML = '';
 
-            if (filteredRows.length === 0) {
-                tableBody.innerHTML = `
+        if (filteredRows.length === 0) {
+            tableBody.innerHTML = `
                     <tr class="empty-row">
                         <td colspan="6" class="px-6 py-3 text-center text-gray-500">Tidak ada data yang cocok.</td>
                     </tr>`;
-            } else {
-                filteredRows.slice(start, end).forEach(row => tableBody.appendChild(row));
-            }
-
-            prevBtn.disabled = currentPage === 1;
-            nextBtn.disabled = currentPage >= totalPages;
+        } else {
+            filteredRows.slice(start, end).forEach(row => tableBody.appendChild(row));
         }
 
-        entriesInput.addEventListener('change', () => {
-            entriesPerPage = parseInt(entriesInput.value) || 1;
-            currentPage = 1;
-            renderTable();
-        });
+        prevBtn.disabled = currentPage === 1;
+        nextBtn.disabled = currentPage >= totalPages;
+    }
 
-        searchInput.addEventListener('input', () => {
-            currentPage = 1;
-            renderTable();
-        });
-
-        prevBtn.addEventListener('click', () => {
-            if (currentPage > 1) {
-                currentPage--;
-                renderTable();
-            }
-        });
-
-        nextBtn.addEventListener('click', () => {
-            currentPage++;
-            renderTable();
-        });
-
+    entriesInput.addEventListener('change', () => {
+        entriesPerPage = parseInt(entriesInput.value) || 1;
+        currentPage = 1;
         renderTable();
     });
 
-    const repairReports = @json($RepairReports);
-    const latestHistory = @json($report ?? null);
-
-    if (latestHistory) {
-        console.log('Status terakhir:', latestHistory.status);
-        // Misalnya: tampilkan ke elemen di halaman
-        document.getElementById('status-info').innerText = latestHistory.status;
-    } else {
-        console.log('User belum memiliki laporan');
-        document.getElementById('status-info').innerText = 'Belum ada laporan yang dibuat.';
-        document.getElementById('cancel-button').classList.add('hidden'); // kalau kamu punya tombol
-    }
-
-    function openModal(modalId) {
-        document.getElementById(modalId).classList.remove('hidden');
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        const imageModal = document.getElementById('imageModal');
-        const modalImage = document.getElementById('modalImage');
-
-        // Event listener saat gambar bukti diklik
-        document.body.addEventListener('click', function(e) {
-            if (e.target.classList.contains('bukti-preview')) {
-                console.log('Gambar diklik:', e.target.getAttribute('src')); // Debug log
-                const src = e.target.getAttribute('src');
-                modalImage.setAttribute('src', src);
-                imageModal.classList.remove('hidden');
-            }
-        });
-
-        // Klik di luar gambar untuk menutup modal
-        imageModal.addEventListener('click', function(e) {
-            if (e.target === imageModal) {
-                imageModal.classList.add('hidden');
-                modalImage.setAttribute('src', '');
-            }
-        });
+    searchInput.addEventListener('input', () => {
+        currentPage = 1;
+        renderTable();
     });
 
-    function getStatusLabelClass(status) {
-        switch (status.toLowerCase()) {
-            case 'diproses':
-                return 'bg-blue-100 text-blue-800';
-            case 'ditolak':
-                return 'bg-red-100 text-red-800';
-            case 'dijadwalkan':
-                return 'bg-indigo-100 text-indigo-800';
-            case 'dalam proses pengerjaan':
-                return 'bg-yellow-100 text-yellow-800';
-            case 'pengecekan akhir':
-                return 'bg-purple-100 text-purple-800';
-            default:
-                return 'bg-gray-100 text-gray-800';
+    prevBtn.addEventListener('click', () => {
+        if (currentPage > 1) {
+            currentPage--;
+            renderTable();
         }
-    }
-
-    // Setelah DOM siap, cari semua elemen dengan class 'status-cell' dan tambahkan class warna sesuai statusnya
-    document.addEventListener('DOMContentLoaded', () => {
-        document.querySelectorAll('.status-cell').forEach(el => {
-            const status = el.getAttribute('data-status');
-            const classes = getStatusLabelClass(status);
-            el.classList.add(...classes.split(' '));
-        });
     });
 
-    function closeAllModals() {
-        const modals = document.querySelectorAll('.modal'); // pastikan semua modal pakai class 'modal'
-        modals.forEach(modal => modal.classList.add('hidden'));
-    }
+    nextBtn.addEventListener('click', () => {
+        currentPage++;
+        renderTable();
+    });
 
-    function openModalEdit() {
-        closeAllModals();
-        document.getElementById('editModal').classList.remove('hidden');
-    }
+    renderTable();
+});
 
-    function closeModalEdit() {
-        document.getElementById('editLaporan').classList.add('hidden');
-    }
+const repairReports = @json($RepairReports);
+const latestHistory = @json($report ?? null);
 
-    function closeModalDetail() {
-        document.getElementById('detailModal').classList.add('hidden');
-    }
+if (latestHistory) {
+    console.log('Status terakhir:', latestHistory.status);
+    // Misalnya: tampilkan ke elemen di halaman
+    document.getElementById('status-info').innerText = latestHistory.status;
+} else {
+    console.log('User belum memiliki laporan');
+    document.getElementById('status-info').innerText = 'Belum ada laporan yang dibuat.';
+    document.getElementById('cancel-button').classList.add('hidden'); // kalau kamu punya tombol
+}
 
-    function openModalKeluhan() {
-        const modal = document.getElementById('keluhanModal');
-        if (!modal) {
-            console.error("Modal keluhanModal tidak ditemukan!");
-            return;
+function openModal(modalId) {
+    document.getElementById(modalId).classList.remove('hidden');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const imageModal = document.getElementById('imageModal');
+    const modalImage = document.getElementById('modalImage');
+
+    // Event listener saat gambar bukti diklik
+    document.body.addEventListener('click', function(e) {
+        if (e.target.classList.contains('bukti-preview')) {
+            console.log('Gambar diklik:', e.target.getAttribute('src')); // Debug log
+            const src = e.target.getAttribute('src');
+            modalImage.setAttribute('src', src);
+            imageModal.classList.remove('hidden');
         }
-        closeAllModals();
-        modal.classList.remove('hidden');
-        console.log('Modal status classes:', modal.classList.toString());
+    });
+
+    // Klik di luar gambar untuk menutup modal
+    imageModal.addEventListener('click', function(e) {
+        if (e.target === imageModal) {
+            imageModal.classList.add('hidden');
+            modalImage.setAttribute('src', '');
+        }
+    });
+});
+
+function getStatusLabelClass(status) {
+    switch (status.toLowerCase()) {
+        case 'diproses':
+            return 'bg-blue-100 text-blue-800';
+        case 'ditolak':
+            return 'bg-red-100 text-red-800';
+        case 'dijadwalkan':
+            return 'bg-indigo-100 text-indigo-800';
+        case 'dalam proses pengerjaan':
+            return 'bg-yellow-100 text-yellow-800';
+        case 'pengecekan akhir':
+            return 'bg-purple-100 text-purple-800';
+        default:
+            return 'bg-gray-100 text-gray-800';
     }
+}
 
-    function closeModalKeluhan() {
-        document.getElementById('keluhanModal').classList.add('hidden');
+// Setelah DOM siap, cari semua elemen dengan class 'status-cell' dan tambahkan class warna sesuai statusnya
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.status-cell').forEach(el => {
+        const status = el.getAttribute('data-status');
+        const classes = getStatusLabelClass(status);
+        el.classList.add(...classes.split(' '));
+    });
+});
+
+function closeAllModals() {
+    const modals = document.querySelectorAll('.modal'); // pastikan semua modal pakai class 'modal'
+    modals.forEach(modal => modal.classList.add('hidden'));
+}
+
+function openModalEdit() {
+    closeAllModals();
+    document.getElementById('editModal').classList.remove('hidden');
+}
+
+function closeModalEdit() {
+    document.getElementById('editLaporan').classList.add('hidden');
+}
+
+function closeModalDetail() {
+    document.getElementById('detailModal').classList.add('hidden');
+}
+
+function openModalKeluhan() {
+    const modal = document.getElementById('keluhanModal');
+    if (!modal) {
+        console.error("Modal keluhanModal tidak ditemukan!");
+        return;
     }
+    closeAllModals();
+    modal.classList.remove('hidden');
+    console.log('Modal status classes:', modal.classList.toString());
+}
 
-    function openModalBatalkan() {
-        document.getElementById('batalkanModal').classList.remove('hidden');
-    }
+function closeModalKeluhan() {
+    document.getElementById('keluhanModal').classList.add('hidden');
+}
 
-    function closeModalBatalkan() {
-        document.getElementById('batalkanModal').classList.add('hidden');
-    }
+function openModalBatalkan() {
+    document.getElementById('batalkanModal').classList.remove('hidden');
+}
+
+function closeModalBatalkan() {
+    document.getElementById('batalkanModal').classList.add('hidden');
+}
 
 
-    function closeRiwayatModal() {
-        document.getElementById('riwayatModal').classList.add('hidden');
-    }
+function closeRiwayatModal() {
+    document.getElementById('riwayatModal').classList.add('hidden');
+}
 
-    function submitPembatalan() {
-        // Lakukan aksi pembatalan di sini
-        // Contoh redirect atau fetch API
-        alert("Laporan berhasil dibatalkan."); // Ganti dengan aksi real
-        closeModalBatalkan();
-    }
+function submitPembatalan() {
+    // Lakukan aksi pembatalan di sini
+    // Contoh redirect atau fetch API
+    alert("Laporan berhasil dibatalkan."); // Ganti dengan aksi real
+    closeModalBatalkan();
+}
 
-    function showRiwayat(reportId) {
-        const laporan = repairReports.find(r => r.id === parseInt(reportId));
-        if (!laporan) return alert('Data laporan tidak ditemukan');
+function showRiwayat(reportId) {
+    const laporan = repairReports.find(r => r.id === parseInt(reportId));
+    if (!laporan) return alert('Data laporan tidak ditemukan');
 
-        const histories = laporan.histories || [];
+    const histories = laporan.histories || [];
 
-        // Urutkan histories dari tanggal terbaru
-        const sortedHistories = [...histories].sort((a, b) => {
-            const dateA = new Date(a.complete_date);
-            const dateB = new Date(b.complete_date);
-            return dateB - dateA; // descending
-        });
+    // Urutkan histories dari tanggal terbaru
+    const sortedHistories = [...histories].sort((a, b) => {
+        const dateA = new Date(a.complete_date);
+        const dateB = new Date(b.complete_date);
+        return dateB - dateA; // descending
+    });
 
-        // Siapkan HTML riwayat
-        let riwayatHtml = '';
-        if (sortedHistories.length > 0) {
-            sortedHistories.forEach(history => {
-                riwayatHtml += `
+    // Siapkan HTML riwayat
+    let riwayatHtml = '';
+    if (sortedHistories.length > 0) {
+        sortedHistories.forEach(history => {
+            riwayatHtml += `
                 <tr class="border-b">
                     <td class="px-6 py-3">
                         <span class="px-2 py-1 text-sm font-semibold rounded ${getStatusLabelClass(history.status)}">
@@ -497,101 +498,101 @@ default: return 'bg-gray-100 text-gray-800';
                     <td class="px-6 py-3">${history.repair_notes || '-'}</td>
                 </tr>
             `;
-            });
-        } else {
-            riwayatHtml = `
+        });
+    } else {
+        riwayatHtml = `
             <tr>
                 <td colspan="4" class="text-center py-4 text-gray-500">Tidak ada riwayat perbaikan.</td>
             </tr>
         `;
-        }
-
-        const riwayatModalContent = document.getElementById('historyContent');
-        riwayatModalContent.innerHTML = riwayatHtml;
-
-        document.getElementById('riwayatModal').classList.remove('hidden');
     }
 
-    function showDetail(reportId) {
-        const riwayatBtn = document.getElementById('btnRiwayat');
-        riwayatBtn.setAttribute('onclick', `showRiwayat(${reportId})`);
+    const riwayatModalContent = document.getElementById('historyContent');
+    riwayatModalContent.innerHTML = riwayatHtml;
 
-        const laporan = repairReports.find(r => r.id === parseInt(reportId));
-        if (!laporan) return;
-        console.log(laporan)
+    document.getElementById('riwayatModal').classList.remove('hidden');
+}
 
-        const batalkanBtn = document.getElementById('btnBatalkan');
-        batalkanBtn.classList.add('hidden');
+function showDetail(reportId) {
+    const riwayatBtn = document.getElementById('btnRiwayat');
+    riwayatBtn.setAttribute('onclick', `showRiwayat(${reportId})`);
 
+    const laporan = repairReports.find(r => r.id === parseInt(reportId));
+    if (!laporan) return;
+    console.log(laporan)
 
-        const keluhanBtn = document.getElementById('btnKeluhan');
-        if (!keluhanBtn) {
-            console.error("Tombol btnKeluhan tidak ditemukan di DOM!");
-            return;
-        }
-        keluhanBtn.classList.add('hidden');
-
-        const createdAt = new Date(laporan.created_at);
-        const now = new Date();
-
-        const diffMs = now - createdAt;
-        const diffDays = diffMs / (1000 * 60 * 60 * 24); // hasil float
-
-        console.log('Created At:', createdAt);
-        console.log('Now:', now);
-        console.log('Selisih Hari:', diffDays);
+    const batalkanBtn = document.getElementById('btnBatalkan');
+    batalkanBtn.classList.add('hidden');
 
 
-        // Tampilkan tombol Ajukan Keluhan jika laporan statusnya "Diproses" dan sudah lebih dari 2 hari
-        if (diffDays >= 1 && laporan.status.trim().toLowerCase() === 'diproses') {
-            keluhanBtn.classList.remove('hidden');
-            keluhanBtn.onclick = () => {
-                console.log("Tombol Ajukan Keluhan diklik!");
-                document.getElementById('KeluhanReportIdInput').value = laporan.id;
-                openModalKeluhan();
-            };
-        }
+    const keluhanBtn = document.getElementById('btnKeluhan');
+    if (!keluhanBtn) {
+        console.error("Tombol btnKeluhan tidak ditemukan di DOM!");
+        return;
+    }
+    keluhanBtn.classList.add('hidden');
+
+    const createdAt = new Date(laporan.created_at);
+    const now = new Date();
+
+    const diffMs = now - createdAt;
+    const diffDays = diffMs / (1000 * 60 * 60 * 24); // hasil float
+
+    console.log('Created At:', createdAt);
+    console.log('Now:', now);
+    console.log('Selisih Hari:', diffDays);
 
 
-        function openEditModal(reportId) {
-            const modal = document.getElementById('editLaporan');
-            const form = document.getElementById('formPelaporan');
-
-            // Set action form ke URL update
-            form.action = `/laporan/${reportId}`;
-
-            // Tampilkan modal
-            modal.classList.remove('hidden');
-        }
-
+    // Tampilkan tombol Ajukan Keluhan jika laporan statusnya "Diproses" dan sudah lebih dari 2 hari
+    if (diffDays >= 1 && laporan.status.trim().toLowerCase() === 'diproses') {
+        keluhanBtn.classList.remove('hidden');
+        keluhanBtn.onclick = () => {
+            console.log("Tombol Ajukan Keluhan diklik!");
+            document.getElementById('KeluhanReportIdInput').value = laporan.id;
+            openModalKeluhan();
+        };
+    }
 
 
-        // Fungsi format tanggal (bisa kamu pindahkan keluar supaya reusable)
-        function formatDateUTC(dateString) {
-            if (!dateString) return '-';
+    function openEditModal(reportId) {
+        const modal = document.getElementById('editLaporan');
+        const form = document.getElementById('formPelaporan');
 
-            const date = new Date(dateString);
-            if (isNaN(date)) return dateString;
+        // Set action form ke URL update
+        form.action = `/laporan/${reportId}`;
 
-            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-            const day = String(date.getUTCDate()).padStart(2, '0');
-            const month = months[date.getUTCMonth()];
-            const year = date.getUTCFullYear();
+        // Tampilkan modal
+        modal.classList.remove('hidden');
+    }
 
-            return `${day} ${month} ${year}`;
-        }
 
-        // Ambil status laporan terbaru
-        const status = laporan.status.toLowerCase();
 
-        // Buat isi detail seperti sebelumnya
-        let riwayatHtml = '';
-        if (laporan.histories && laporan.histories.length > 0) {
-            const lastHistory = laporan.histories[laporan.histories.length - 1];
-            const statusClass = getStatusLabelClass(lastHistory.status);
-            riwayatHtml = `
+    // Fungsi format tanggal (bisa kamu pindahkan keluar supaya reusable)
+    function formatDateUTC(dateString) {
+        if (!dateString) return '-';
+
+        const date = new Date(dateString);
+        if (isNaN(date)) return dateString;
+
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const day = String(date.getUTCDate()).padStart(2, '0');
+        const month = months[date.getUTCMonth()];
+        const year = date.getUTCFullYear();
+
+        return `${day} ${month} ${year}`;
+    }
+
+    // Ambil status laporan terbaru
+    const status = laporan.status.toLowerCase();
+
+    // Buat isi detail seperti sebelumnya
+    let riwayatHtml = '';
+    if (laporan.histories && laporan.histories.length > 0) {
+        const lastHistory = laporan.histories[laporan.histories.length - 1];
+        const statusClass = getStatusLabelClass(lastHistory.status);
+        riwayatHtml = `
             <div>
-                <strong>Status:</strong> 
+                <strong>Status:</strong>
                 <span class="px-2 mb-2 text-sm font-semibold rounded ${statusClass}">
                     ${lastHistory.status}
                 </span><br>
@@ -599,24 +600,24 @@ default: return 'bg-gray-100 text-gray-800';
                 <strong>Catatan:</strong> ${lastHistory.repair_notes ?? '-'}<br>
             </div>
         `;
-        } else {
-            riwayatHtml = 'Tidak ada riwayat perbaikan.';
-        }
+    } else {
+        riwayatHtml = 'Tidak ada riwayat perbaikan.';
+    }
 
-        // Isi tabel detail
-        const detailContent = document.getElementById('detailContent');
-        // Ambil foto perbaikan dari history terakhir jika ada
-        // Ambil history dengan status "Pengecekan akhir"
-        const pengecekanAkhirHistory = laporan.histories?.find(
-            (item) => item.status === "Pengecekan akhir"
-        );
+    // Isi tabel detail
+    const detailContent = document.getElementById('detailContent');
+    // Ambil foto perbaikan dari history terakhir jika ada
+    // Ambil history dengan status "Pengecekan akhir"
+    const pengecekanAkhirHistory = laporan.histories?.find(
+        (item) => item.status === "Pengecekan akhir"
+    );
 
-        // Ambil foto perbaikan jika ada di status "Pengecekan akhir"
-        const repairPhoto = pengecekanAkhirHistory?.damage_photo ?
-            `<img src="/storage/${pengecekanAkhirHistory.damage_photo}" alt="Foto Perbaikan" class="max-w-xs max-h-48 rounded border border-gray-300 bukti-preview cursor-pointer" />` :
-            '-';
+    // Ambil foto perbaikan jika ada di status "Pengecekan akhir"
+    const repairPhoto = pengecekanAkhirHistory?.damage_photo ?
+        `<img src="/storage/${pengecekanAkhirHistory.damage_photo}" alt="Foto Perbaikan" class="max-w-xs max-h-48 rounded border border-gray-300 bukti-preview cursor-pointer" />` :
+        '-';
 
-        detailContent.innerHTML = `
+    detailContent.innerHTML = `
         <tr><td class="px-6 py-3 font-semibold">Nomor Pengajuan</td><td class="px-6 py-3">${String(laporan.id).padStart(4, '0')}</td></tr>
         <tr><td class="px-6 py-3 font-semibold">Status Laporan Terkini</td><td class="px-6 py-3"><span class="text-xs font-semibold inline-block px-2 py-1 rounded ${getStatusLabelClass(laporan.status)}">${laporan.status}</span></td></tr>
         <tr><td class="px-6 py-3 font-semibold">Tanggal Diajukan</td><td class="px-6 py-3">${formatDateUTC(laporan.created_at)}</td></tr>
@@ -633,62 +634,62 @@ default: return 'bg-gray-100 text-gray-800';
         <tr><td class="px-6 py-3 font-semibold">Tanggal Perbaikan</td><td class="px-6 py-3">${laporan.schedules?.repair_date ?? '-'}</td></tr>
     `;
 
-        if (laporan.status.toLowerCase() === 'diproses') {
-            batalkanBtn.classList.remove('hidden');
-            batalkanBtn.onclick = () => {
-                document.getElementById('BatalkanReportIdInput').value = laporan.id;
-                openModalBatalkan();
-            };
-        }
-
-        // Tampilkan tombol Edit hanya jika status 'Diproses'
-        const btnEdit = document.getElementById('btnEditLaporan');
-        if (laporan.status.toLowerCase() === 'diproses') {
-            btnEdit.classList.remove('hidden');
-            btnEdit.onclick = function() {
-                closeAllModals();
-                const modalEdit = document.getElementById('editLaporan');
-                modalEdit.classList.remove('hidden');
-
-                // Isi field input di form modal edit
-                const fasilitasValue = laporan.room?.room_name || laporan.building?.building_name || '-';
-                document.querySelector('input[name="fasilitas"]').value = fasilitasValue;
-                document.getElementById('fasilitasBtn').innerText = fasilitasValue;
-
-                document.querySelector('input[name="facility_name"]').value =
-                    laporan.room_facility?.facility_name ?? '';
-
-                document.querySelector('select[name="damage_impact"]').value =
-                    laporan.damage_impact ?? '';
-
-                document.querySelector('input[name="damage_description"]').value =
-                    laporan.damage_description ?? '';
-
-                const form = document.getElementById('formPelaporan');
-                form.action = `/laporan-user/${laporan.id}`; // Sesuaikan jika prefix route berbeda
-                form.method = 'POST'; // Form HTML hanya mendukung GET dan POST
-
-                // Tambahkan input hidden _method=PUT jika belum ada
-                let methodInput = form.querySelector('input[name="_method"]');
-                if (!methodInput) {
-                    methodInput = document.createElement('input');
-                    methodInput.type = 'hidden';
-                    methodInput.name = '_method';
-                    methodInput.value = 'PUT';
-                    form.appendChild(methodInput);
-                } else {
-                    methodInput.value = 'PUT'; // Pastikan valuenya benar
-                }
-
-                // Catatan: input file tidak bisa diisi otomatis karena alasan keamanan browser
-            };
-
-        } else {
-            btnEdit.classList.add('hidden');
-            btnEdit.onclick = null;
-        }
-
-        document.getElementById('detailModal').classList.remove('hidden');
+    if (laporan.status.toLowerCase() === 'diproses') {
+        batalkanBtn.classList.remove('hidden');
+        batalkanBtn.onclick = () => {
+            document.getElementById('BatalkanReportIdInput').value = laporan.id;
+            openModalBatalkan();
+        };
     }
+
+    // Tampilkan tombol Edit hanya jika status 'Diproses'
+    const btnEdit = document.getElementById('btnEditLaporan');
+    if (laporan.status.toLowerCase() === 'diproses') {
+        btnEdit.classList.remove('hidden');
+        btnEdit.onclick = function() {
+            closeAllModals();
+            const modalEdit = document.getElementById('editLaporan');
+            modalEdit.classList.remove('hidden');
+
+            // Isi field input di form modal edit
+            const fasilitasValue = laporan.room?.room_name || laporan.building?.building_name || '-';
+            document.querySelector('input[name="fasilitas"]').value = fasilitasValue;
+            document.getElementById('fasilitasBtn').innerText = fasilitasValue;
+
+            document.querySelector('input[name="facility_name"]').value =
+                laporan.room_facility?.facility_name ?? '';
+
+            document.querySelector('select[name="damage_impact"]').value =
+                laporan.damage_impact ?? '';
+
+            document.querySelector('input[name="damage_description"]').value =
+                laporan.damage_description ?? '';
+
+            const form = document.getElementById('formPelaporan');
+            form.action = `/laporan-user/${laporan.id}`; // Sesuaikan jika prefix route berbeda
+            form.method = 'POST'; // Form HTML hanya mendukung GET dan POST
+
+            // Tambahkan input hidden _method=PUT jika belum ada
+            let methodInput = form.querySelector('input[name="_method"]');
+            if (!methodInput) {
+                methodInput = document.createElement('input');
+                methodInput.type = 'hidden';
+                methodInput.name = '_method';
+                methodInput.value = 'PUT';
+                form.appendChild(methodInput);
+            } else {
+                methodInput.value = 'PUT'; // Pastikan valuenya benar
+            }
+
+            // Catatan: input file tidak bisa diisi otomatis karena alasan keamanan browser
+        };
+
+    } else {
+        btnEdit.classList.add('hidden');
+        btnEdit.onclick = null;
+    }
+
+    document.getElementById('detailModal').classList.remove('hidden');
+}
 </script>
 @endsection

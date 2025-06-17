@@ -55,21 +55,21 @@
 
 <!-- Taruh ini di paling bawah halaman sebelum </body> -->
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const notificationButton = document.getElementById('notificationButton');
-        const notificationPopup = document.getElementById('notificationPopup');
+document.addEventListener("DOMContentLoaded", function() {
+    const notificationButton = document.getElementById('notificationButton');
+    const notificationPopup = document.getElementById('notificationPopup');
 
-        notificationButton.addEventListener('click', function(event) {
-            event.stopPropagation();
-            notificationPopup.classList.toggle('hidden');
-        });
-
-        document.addEventListener('click', function(event) {
-            const isClickInside = notificationButton.contains(event.target) || notificationPopup.contains(
-                event.target);
-            if (!isClickInside) {
-                notificationPopup.classList.add('hidden');
-            }
-        });
+    notificationButton.addEventListener('click', function(event) {
+        event.stopPropagation();
+        notificationPopup.classList.toggle('hidden');
     });
+
+    document.addEventListener('click', function(event) {
+        const isClickInside = notificationButton.contains(event.target) || notificationPopup.contains(
+            event.target);
+        if (!isClickInside) {
+            notificationPopup.classList.add('hidden');
+        }
+    });
+});
 </script>

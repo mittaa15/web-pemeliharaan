@@ -7,8 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     @vite('resources/css/app.css')
     <script>
-        const updateStatusUrl = "{{ route('update-status-sarpras') }}";
-        const csrfToken = "{{ csrf_token() }}";
+    const updateStatusUrl = "{{ route('update-status-sarpras') }}";
+    const csrfToken = "{{ csrf_token() }}";
     </script>
     <title>@yield('title', 'Dashboard')</title>
 </head>
@@ -36,7 +36,7 @@
 
         <!-- Sidebar -->
         <aside id="sidebar"
-            class="w-72 md:static fixed top-10 left-0 h-screen bg-white text-base-content p-6 z-50 shadow-md transition-transform duration-300 transform -translate-x-full md:translate-x-0 md:block overflow-y-auto"
+            class="w-72 md:static fixed top-0 h-screen md:top-10 left-0  bg-white text-base-content p-6 z-50 shadow-md transition-transform duration-300 transform -translate-x-full md:translate-x-0 sm:blockx overflow-y-auto"
             x-data="{ open: {{ $submenuOpen ? 'true' : 'false' }} }">
 
             <div class="mb-4 text-center">
@@ -165,19 +165,19 @@
     @yield('scripts')
 
     <script>
-        const toggleBtn = document.getElementById('toggleSidebar');
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('overlay');
+    const toggleBtn = document.getElementById('toggleSidebar');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
 
-        toggleBtn.addEventListener('click', () => {
-            sidebar.classList.toggle('-translate-x-full');
-            overlay.classList.toggle('hidden');
-        });
+    toggleBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('-translate-x-full');
+        overlay.classList.toggle('hidden');
+    });
 
-        overlay.addEventListener('click', () => {
-            sidebar.classList.add('-translate-x-full');
-            overlay.classList.add('hidden');
-        });
+    overlay.addEventListener('click', () => {
+        sidebar.classList.add('-translate-x-full');
+        overlay.classList.add('hidden');
+    });
     </script>
 
     @stack('scripts')

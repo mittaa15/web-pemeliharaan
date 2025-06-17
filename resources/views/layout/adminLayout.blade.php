@@ -36,7 +36,7 @@
 
         <!-- Sidebar -->
         <aside id="sidebar"
-            class="w-72 md:static fixed top-10 left-0 h-screen bg-white text-base-content p-6 z-50 shadow-md transition-transform duration-300 transform -translate-x-full md:translate-x-0 md:block overflow-y-auto"
+            class="w-72 md:static fixed top-0 h-screen md:top-10 left-0  bg-white text-base-content p-6 z-50 shadow-md transition-transform duration-300 transform -translate-x-full md:translate-x-0 sm:blockx overflow-y-auto"
             x-data="{ open: {{ $submenuOpen ? 'true' : 'false' }} }">
 
             <div class="mb-4 text-center">

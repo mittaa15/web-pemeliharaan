@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
@@ -24,7 +25,7 @@
 
         <!-- Sidebar -->
         <aside id="sidebar"
-            class="w-64 md:static fixed top-10 left-0 h-screen bg-white text-gray-800 p-6 z-50 shadow-md transition-transform duration-300 transform -translate-x-full md:translate-x-0 md:block overflow-y-auto">
+            class="w-72 md:static fixed top-0 h-screen md:top-10 left-0  bg-white text-base-content p-6 z-50 shadow-md transition-transform duration-300 transform -translate-x-full md:translate-x-0 sm:blockx overflow-y-auto">
 
             <!-- Logo & Judul -->
             <div class="mb-6 text-center">
@@ -83,7 +84,7 @@
         </aside>
 
         <!-- Main Content -->
-        <main class="flex-1 bg-gray-200">
+        <main class="flex-1 min-w-0 bg-gray-200">
             @include('layout.usertopLayout')
             <div class="p-6">
                 @yield('content')
@@ -94,20 +95,22 @@
     @yield('scripts')
 
     <script>
-        const toggleBtn = document.getElementById('toggleSidebar');
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('overlay');
+    const toggleBtn = document.getElementById('toggleSidebar');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
 
-        toggleBtn.addEventListener('click', () => {
-            sidebar.classList.toggle('-translate-x-full');
-            overlay.classList.toggle('hidden');
-        });
+    toggleBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('-translate-x-full');
+        overlay.classList.toggle('hidden');
+    });
 
-        overlay.addEventListener('click', () => {
-            sidebar.classList.add('-translate-x-full');
-            overlay.classList.add('hidden');
-        });
+    overlay.addEventListener('click', () => {
+        sidebar.classList.add('-translate-x-full');
+        overlay.classList.add('hidden');
+    });
     </script>
+
+    @stack('scripts')
 </body>
 
 </html>

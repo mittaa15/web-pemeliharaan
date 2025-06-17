@@ -23,19 +23,20 @@
         </div>
 
         <div class="space-y-6">
-            <div class="flex justify-between space-x-8">
+            <div class="flex flex-col lg:flex-row justify-between gap-8">
                 <div class="w-full">
                     <h2 class="text-lg font-bold text-primary mb-2">Facilities</h2>
-                    <div>
-                        <table class="table w-full text-sm text-left text-gray-600 border" id="facilitiesTable">
+
+                    <div class="overflow-x-auto bg-white rounded shadow border">
+                        <table class="min-w-full text-sm text-left text-gray-600" id="facilitiesTable">
                             <thead class="bg-primary text-xs uppercase text-white">
                                 <tr>
-                                    <th class="px-6 py-3">Gedung</th>
-                                    <th class="px-6 py-3">Ruang</th>
-                                    <th class="px-6 py-3">Nama Fasilitas</th>
-                                    <th class="px-6 py-3">Jumlah</th>
-                                    <th class="px-6 py-3">Deskripsi</th>
-                                    <th class="px-6 py-3">Aksi</th>
+                                    <th class="px-4 py-3 whitespace-nowrap">Gedung</th>
+                                    <th class="px-4 py-3 whitespace-nowrap">Ruang</th>
+                                    <th class="px-4 py-3 whitespace-nowrap">Nama Fasilitas</th>
+                                    <th class="px-4 py-3 whitespace-nowrap">Jumlah</th>
+                                    <th class="px-4 py-3 whitespace-nowrap">Deskripsi</th>
+                                    <th class="px-4 py-3 whitespace-nowrap">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -45,23 +46,35 @@
                                     data-building="{{ $facility->room->building->building_name }}"
                                     data-description="{{ $facility->description }}"
                                     data-number="{{ $facility->number_units }}">
-                                    <td>{{ $facility->room->building->building_name ?? '-' }}</td>
-                                    <td class="px-6 py-3 capitalize">{{ $facility->room->room_name }}</td>
-                                    <td class="px-6 py-3">{{ $facility->facility_name }}</td>
-                                    <td class="px-6 py-3">{{ $facility->number_units }}</td>
-                                    <td class="px-6 py-3">{{ $facility->description }}</td>
-                                    <td class="px-6 py-3 relative">
+
+                                    <td class="px-4 py-3 whitespace-nowrap">
+                                        {{ $facility->room->building->building_name ?? '-' }}
+                                    </td>
+                                    <td class="px-4 py-3 capitalize whitespace-nowrap">
+                                        {{ $facility->room->room_name }}
+                                    </td>
+                                    <td class="px-4 py-3 whitespace-nowrap">{{ $facility->facility_name }}</td>
+                                    <td class="px-4 py-3 whitespace-nowrap">{{ $facility->number_units }}</td>
+                                    <td class="px-4 py-3 whitespace-nowrap">{{ $facility->description }}</td>
+                                    <td class="px-4 py-3 whitespace-nowrap relative">
                                         <div class="relative inline-block text-left">
-                                            <button onclick="toggleDropdown(this)"
-                                                class="text-primary hover:underline">Aksi ▼</button>
+                                            <button onclick="toggleDropdown(this)" class="text-primary hover:underline">
+                                                Aksi ▼
+                                            </button>
                                             <div
                                                 class="dropdown-menu hidden absolute right-0 mt-2 w-36 bg-white border rounded shadow-lg z-10">
                                                 <button onclick="showFacilityDetails(this)"
-                                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left">Detail</button>
+                                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left">
+                                                    Detail
+                                                </button>
                                                 <button onclick="editFacility(this)"
-                                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left">Edit</button>
+                                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left">
+                                                    Edit
+                                                </button>
                                                 <button onclick="deleteFacility(this)"
-                                                    class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100 w-full text-left">Hapus</button>
+                                                    class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100 w-full text-left">
+                                                    Hapus
+                                                </button>
                                             </div>
                                         </div>
                                     </td>
@@ -71,12 +84,14 @@
                         </table>
                     </div>
                 </div>
-                <form id="deleteFacilityForm" method="POST" style="display: none;">
+
+                <form id="deleteFacilityForm" method="POST" class="hidden">
                     @csrf
                     @method('DELETE')
                 </form>
             </div>
         </div>
+
     </div>
 </div>
 
@@ -296,7 +311,8 @@ function openRiwayatModal() {
             const kodeLaporan = report.id ? String(report.id).padStart(4, '0') : '-';
             const status = report.status ?? '-';
             const deskripsi = report.damage_description ?? '-';
-            const tanggalSelesai = report.updated_at ? new Date(report.updated_at).toLocaleDateString() : '-';
+            const tanggalSelesai = report.updated_at ? new Date(report.updated_at).toLocaleDateString() :
+                '-';
 
             const tr = document.createElement('tr');
             tr.innerHTML = `
