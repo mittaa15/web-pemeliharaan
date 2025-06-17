@@ -2,25 +2,26 @@
 <html lang="en">
 
 <head>
+    <link rel="icon" href="{{ asset('images/ITK_1.png') }}" type="image/png" />
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Form</title>
     @vite('resources/css/app.css')
     <style>
-        /* Menambahkan warna teks dan latar belakang input */
-        input[type="text"],
-        input[type="email"],
-        input[type="password"] {
-            color: #4B5563;
-            /* gray-600 */
-            background-color: #ffffff;
-            /* putih */
-        }
+    /* Menambahkan warna teks dan latar belakang input */
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+        color: #4B5563;
+        /* gray-600 */
+        background-color: #ffffff;
+        /* putih */
+    }
 
-        /* Mengubah warna tulisan "Pemeliharaan" menjadi hitam */
-        .judul-pemeliharaan {
-            color: black;
-        }
+    /* Mengubah warna tulisan "Pemeliharaan" menjadi hitam */
+    .judul-pemeliharaan {
+        color: black;
+    }
     </style>
 </head>
 
@@ -138,29 +139,29 @@
 
     <!-- Script toggle password -->
     <script>
-        const togglePassword = document.getElementById('togglePassword');
-        const passwordInput = document.getElementById('password');
-        const eyeOpen = document.getElementById('eyeOpen');
-        const eyeClosed = document.getElementById('eyeClosed');
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
+    const eyeOpen = document.getElementById('eyeOpen');
+    const eyeClosed = document.getElementById('eyeClosed');
 
-        togglePassword.addEventListener('click', () => {
-            const type = passwordInput.type === 'password' ? 'text' : 'password';
-            passwordInput.type = type;
-            eyeOpen.classList.toggle('hidden');
-            eyeClosed.classList.toggle('hidden');
-        });
+    togglePassword.addEventListener('click', () => {
+        const type = passwordInput.type === 'password' ? 'text' : 'password';
+        passwordInput.type = type;
+        eyeOpen.classList.toggle('hidden');
+        eyeClosed.classList.toggle('hidden');
+    });
 
-        const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
-        const confirmPasswordInput = document.getElementById('confirmPassword');
-        const eyeOpenConfirm = document.getElementById('eyeOpenConfirm');
-        const eyeClosedConfirm = document.getElementById('eyeClosedConfirm');
+    const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+    const confirmPasswordInput = document.getElementById('confirmPassword');
+    const eyeOpenConfirm = document.getElementById('eyeOpenConfirm');
+    const eyeClosedConfirm = document.getElementById('eyeClosedConfirm');
 
-        toggleConfirmPassword.addEventListener('click', () => {
-            const type = confirmPasswordInput.type === 'password' ? 'text' : 'password';
-            confirmPasswordInput.type = type;
-            eyeOpenConfirm.classList.toggle('hidden');
-            eyeClosedConfirm.classList.toggle('hidden');
-        });
+    toggleConfirmPassword.addEventListener('click', () => {
+        const type = confirmPasswordInput.type === 'password' ? 'text' : 'password';
+        confirmPasswordInput.type = type;
+        eyeOpenConfirm.classList.toggle('hidden');
+        eyeClosedConfirm.classList.toggle('hidden');
+    });
     </script>
 </body>
 
