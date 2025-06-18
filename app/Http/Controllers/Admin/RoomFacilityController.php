@@ -15,13 +15,26 @@ class RoomFacilityController extends Controller
      */
     public function index()
     {
-        $rooms = Room::with(['building:id,building_name'])->get(['id', 'room_name', 'id_building']);
+        // Mengambil data ruang beserta nama gedung, diurutkan berdasarkan nama gedung dan nama ruang
+        $rooms = Room::with(['building:id,building_name'])
+            ->join('building', 'room.id_building', '=', 'building.id')
+            ->orderBy('building.building_name', 'asc')
+            ->orderBy('room.room_name', 'asc')
+            ->select('room.id', 'room.room_name', 'room.id_building')
+            ->get();
 
-        // Tambahkan eager loading sampai ke building
-        $facilities = RoomFacility::with('room.building:id,building_name', 'repairReports')->get();
+        // Mengambil data fasilitas ruang, dengan eager loading hingga gedung, dan diurutkan berdasarkan nama gedung dan nama ruang
+        $facilities = RoomFacility::with('room.building:id,building_name', 'repairReports')
+            ->join('room', 'room_facility.id_room', '=', 'room.id')
+            ->join('building', 'room.id_building', '=', 'building.id')
+            ->orderBy('building.building_name', 'asc')
+            ->orderBy('room.room_name', 'asc')
+            ->select('room_facility.*')
+            ->get();
 
         return view('admin.dataFasilitasRuangAdmin', compact('facilities', 'rooms'));
     }
+
 
 
     /**

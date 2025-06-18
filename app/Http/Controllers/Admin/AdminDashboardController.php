@@ -100,8 +100,6 @@ class AdminDashboardController extends Controller
         ));
     }
 
-
-
     public function adminRiwayatPerbaikanView()
     {
         $RepairReports = RepairReport::with([

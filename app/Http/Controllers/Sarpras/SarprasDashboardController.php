@@ -167,7 +167,7 @@ class SarprasDashboardController extends Controller
 
     public function sarprasDataTeknisiView()
     {
-        $technicians = Technician::all();
+        $technicians = Technician::orderBy('name', 'asc')->get();
         return view('sarpras.sarprasDataTeknisi', compact('technicians'));
     }
 }

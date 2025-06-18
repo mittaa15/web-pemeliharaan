@@ -16,10 +16,14 @@ class BuildingFacilityController extends Controller
      */
     public function index()
     {
-        $buildings = Building::all();
+        // Mengurutkan data gedung berdasarkan nama (A-Z)
+        $buildings = Building::orderBy('building_name', 'asc')->get();
 
-        // Ambil fasilitas indoor
-        $facilities = BuildingFacility::with('building:id,building_name', 'repairReports')
+        // Mengurutkan data fasilitas berdasarkan nama gedung (melalui relasi)
+        $facilities = BuildingFacility::with(['building:id,building_name', 'repairReports'])
+            ->join('building', 'building_facility.id_building', '=', 'building.id')
+            ->orderBy('building.building_name', 'asc')
+            ->select('building_facility.*') // pilih semua kolom dari building_facility saja
             ->get();
 
         return view('admin.dataFasilitasGedungAdmin', compact('buildings', 'facilities'));
