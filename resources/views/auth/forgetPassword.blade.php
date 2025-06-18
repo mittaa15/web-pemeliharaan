@@ -12,6 +12,21 @@
 <body class="bg-primary flex items-center justify-center min-h-screen px-4">
 
     <div class="bg-white rounded-lg shadow-xl px-6 py-7 w-full max-w-sm">
+        {{-- ✅ Tambahkan di sini --}}
+        @if (session('status'))
+        <div class="mb-4 text-sm text-green-600 bg-green-100 border border-green-300 rounded-md p-2">
+            {{ session('status') }}
+        </div>
+        @endif
+
+        @if ($errors->any())
+        <div class="mb-4 text-sm text-red-600 bg-red-100 border border-red-300 rounded-md p-2">
+            @foreach ($errors->all() as $error)
+            <div>{{ $error }}</div>
+            @endforeach
+        </div>
+        @endif
+
         <div class="flex justify-center mb-4">
             <img src="{{ asset('images/ITK_1.png') }}" alt="Logo" class="w-20">
         </div>
@@ -20,6 +35,21 @@
                 <span class="text-primary">SIM -</span> Pemeliharaan
             </h2>
         </div>
+
+        <!-- {{-- ✅ Tambahkan di sini --}}
+        @if (session('status'))
+        <div class="mb-4 text-sm text-green-600 bg-green-100 border border-green-300 rounded-md p-2">
+            {{ session('status') }}
+        </div>
+        @endif
+
+        @if ($errors->any())
+        <div class="mb-4 text-sm text-red-600 bg-red-100 border border-red-300 rounded-md p-2">
+            @foreach ($errors->all() as $error)
+            <div>{{ $error }}</div>
+            @endforeach
+        </div>
+        @endif -->
 
         <form method="POST" action="{{ url('/forgot-password') }}">
             @csrf

@@ -111,16 +111,20 @@ class AuthController extends Controller
     {
         $request->validate(['email' => 'required|email']);
 
-        $username = User::where('email', $request->email)->first();
-        if (!$username) {
-            return back()->withErrors(['email' => 'Tidak ada akun yang ditemukan dengan email yang anda masukkan']);
+        $user = User::where('email', $request->email)->first();
+        if (!$user) {
+            return back()->withErrors(['email' => 'Tidak ada akun yang ditemukan dengan email yang anda masukkan.']);
         }
 
-        $token = Password::createToken($username);
+        $token = Password::createToken($user);
         $resetUrl = url(route('password.reset', ['token' => $token, 'email' => $request->email], false));
 
-        Mail::to($request->email)->send(new ResetPasswordMail($resetUrl, $username->nama));
+        Mail::to($request->email)->send(new ResetPasswordMail($resetUrl, $user->nama));
+
+        return back()->with('status', 'Link reset password berhasil dikirim ke email. Silahkan cek email Anda.');
     }
+
+
     public function resetPasswordView()
     {
         return view('auth.resetPassword');
