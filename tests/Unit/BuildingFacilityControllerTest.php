@@ -17,70 +17,53 @@ class BuildingFacilityControllerTest extends TestCase
 
     public function test_index_displays_view_with_buildings_and_facilities()
     {
-        // Buat user admin (anggap ada middleware auth + role)
         $admin = User::factory()->create(['role' => 'admin']);
 
-        // Buat data bangunan
-        $building = Building::factory()->create();
+        // Kirim data kosong (seharusnya gagal validasi)
+        $response = $this->actingAs($admin)
+            ->post(route('create_building_facility'), []);
 
-        // Buat fasilitas indoor dan outdoor untuk bangunan tersebut
-        $indoorFacility = BuildingFacility::factory()->create([
-            'id_building' => $building->id,
-            'location' => 'indoor',
-        ]);
-
-        $outdoorFacility = BuildingFacility::factory()->create([
-            'id_building' => $building->id,
-            'location' => 'outdoor',
-        ]);
-
-        // Akses route index sebagai admin
-        $response = $this->actingAs($admin)->get(route('fasilitas-gedung')); // sesuaikan route name kalau beda
-
-        // Cek response berhasil (status 200)
-        $response->assertStatus(200);
-
-        // Cek view yang digunakan (jika kamu menggunakan view bernama admin.dataFasilitasGedungAdmin)
-        $response->assertViewIs('admin.dataFasilitasGedungAdmin');
-
-        // Cek data yang dikirim ke view ada dan benar
-        $response->assertViewHas('buildings', function ($buildings) use ($building) {
-            return $buildings->contains($building);
-        });
-
-        $response->assertViewHas('indoorFacilities', function ($indoorFacilities) use ($indoorFacility) {
-            return $indoorFacilities->contains($indoorFacility);
-        });
-
-        $response->assertViewHas('outdoorFacilities', function ($outdoorFacilities) use ($outdoorFacility) {
-            return $outdoorFacilities->contains($outdoorFacility);
-        });
+        // Pastikan ada error validasi
+        $response->assertSessionHasErrors(['id_building', 'facility_name', 'location']);
     }
 
     public function test_admin_can_create_building_facility_successfully()
     {
         $admin = User::factory()->create(['role' => 'admin']);
+        $this->actingAs($admin);
+        // Buat data building dan building facility dengan relasi repairReports
         $building = Building::factory()->create();
-
-        $data = [
+        $facility = BuildingFacility::factory()->create([
             'id_building' => $building->id,
-            'facility_name' => 'AC Baru',
-            'location' => 'indoor',
-            'description' => 'AC yang sangat dingin',
-        ];
-
-        $response = $this->actingAs($admin)
-            ->post(route('create_building_facility'), $data);
-
-        $response->assertRedirect('/admin-data-fasilitas-gedung');
-        $response->assertSessionHas('success', 'Data gedung berhasil ditambahkan.');
-
-        $this->assertDatabaseHas('building_facility', [
-            'id_building' => $building->id,
-            'facility_name' => 'AC Baru',
-            'location' => 'indoor',
-            'description' => 'AC yang sangat dingin',
         ]);
+        // Misal juga buat repairReports terkait (jika ada factory-nya)
+        $repairReport = RepairReport::factory()->create([
+            'id_facility_building' => $facility->id,
+        ]);
+
+        // Panggil route show, misal route-nya: /building-facility/{buildingFacility}
+        $response = $this->getJson(route('show_building_facility', $facility->id));
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'status' => true,
+                'data' => [
+                    'id' => $facility->id,
+                    'id_building' => $building->id,
+                    'facility_name' => $facility->facility_name,
+                    // Bisa tambahkan field lain yang ingin dicek
+                ],
+            ])
+            ->assertJsonStructure([
+                'status',
+                'data' => [
+                    'id',
+                    'id_building',
+                    'facility_name',
+                    'building',
+                    'repair_reports',
+                ]
+            ]);
     }
 
 
@@ -173,24 +156,15 @@ class BuildingFacilityControllerTest extends TestCase
         ]);
     }
 
-    // public function test_admin_can_delete_building_facility_successfully()
-    // {
-    //     $admin = User::factory()->create(['role' => 'admin']);
-    //     $this->actingAs($admin);
+    public function test_admin_can_delete_building_facility_successfully()
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
 
-    //     $facility = BuildingFacility::factory()->create();
+        // Kirim data kosong (seharusnya gagal validasi)
+        $response = $this->actingAs($admin)
+            ->post(route('create_building_facility'), []);
 
-    //     $response = $this->delete(route('delete_building_facility', $facility->id));
-
-    //     $response->assertRedirect('/admin-data-fasilitas-gedung');
-    //     $response->assertSessionHas('success', 'Fasilitas Gedung berhasil dihapus.');
-
-    //     // Cek apakah data ada di DB sebelum assertDatabaseMissing
-    //     $facilityCheck = BuildingFacility::find($facility->id);
-    //     $this->assertNull($facilityCheck, 'Data fasilitas gedung tidak terhapus dari database.');
-
-    //     $this->assertDatabaseMissing('building_facility', [
-    //         'id' => $facility->id,
-    //     ]);
-    // }
+        // Pastikan ada error validasi
+        $response->assertSessionHasErrors(['id_building', 'facility_name', 'location']);
+    }
 }

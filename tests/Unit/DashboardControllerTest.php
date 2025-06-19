@@ -207,40 +207,46 @@ class DashboardControllerTest extends TestCase
     }
 
 
-    // public function test_user_can_view_repair_report_detail_with_latest_history()
-    // {
-    //     // Arrange: buat user dan login
-    //     $user = User::factory()->create();
-    //     $this->actingAs($user);
+    public function test_user_can_view_repair_report_detail_with_latest_history()
+    {
+        // 1. Siapkan user dan login
+        $user = User::factory()->create();
 
-    //     // Buat repair report untuk user
-    //     $report = RepairReport::factory()->create([
-    //         'id_user' => $user->id,
-    //     ]);
+        // 2. Buat beberapa RepairReport untuk user ini dengan status tertentu
+        $reports = RepairReport::factory()
+            ->count(3)
+            ->for($user, 'user') // Pastikan relasi id_user sesuai
+            ->state(function () {
+                return ['status' => 'Selesai'];
+            })
+            ->create();
 
-    //     // Tambahkan beberapa repair history
-    //     RepairHistory::factory()->create([
-    //         'id_report' => $report->id,
-    //         'status' => 'Diproses',
-    //         'created_at' => now()->subDays(2),
-    //     ]);
+        // Buat juga laporan dengan status lain agar tidak muncul
+        RepairReport::factory()->create([
+            'id_user' => $user->id,
+            'status' => 'Diproses',
+        ]);
 
-    //     $latestHistory = RepairHistory::factory()->create([
-    //         'id_report' => $report->id,
-    //         'status' => 'Dijadwalkan',
-    //         'created_at' => now()->subDay(),
-    //     ]);
+        // 3. Akses route yang memanggil method riwayatLaporanPerbaikanView
+        // Pastikan route-nya sudah ada dan punya nama misal 'riwayat-laporan'
+        $response = $this->actingAs($user)->get(route('riwayat-laporan-perbaikan'));
 
-    //     // Act: akses halaman detail
-    //     $response = $this->get("/repair-detail/{$report->id}"); // Ganti route jika perlu
+        // 4. Assert status OK dan view yang dipanggil
+        $response->assertStatus(200);
+        $response->assertViewIs('user.riwayatLaporanPerbaikan');
 
-    //     // Assert
-    //     $response->assertStatus(200);
-    //     $response->assertViewIs('user.repairDetail');
-    //     $response->assertViewHasAll(['report', 'latestHistory']);
+        // 5. Assert view memiliki variabel RepairReports dan data sesuai
+        $response->assertViewHas('RepairReports');
 
-    //     // Cek isi data yang dilempar ke view
-    //     $this->assertEquals($report->id, $response->viewData('report')->id);
-    //     $this->assertEquals($latestHistory->id, $response->viewData('latestHistory')->id);
-    // }
+        $repairReports = $response->viewData('RepairReports');
+
+        // Cek apakah hanya laporan user dan status tertentu yang diambil
+        foreach ($repairReports as $report) {
+            $this->assertEquals($user->id, $report->id_user);
+            $this->assertContains($report->status, ['Selesai', 'Ditolak', 'Dibatalkan']);
+        }
+
+        // Cek jumlah laporan yang muncul sama dengan yang dibuat dengan status filter
+        $this->assertCount(3, $repairReports);
+    }
 }

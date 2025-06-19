@@ -544,7 +544,7 @@
             <tr><td class="px-6 py-3 font-semibold">Bukti Kerusakan</td><td class="px-6 py-3">${laporan.damage_photo? `<img src="/storage/${laporan.damage_photo}" alt="Bukti Kerusakan" class="max-w-xs border border-gray-300 rounded cursor-pointer max-h-48 bukti-preview" />` : '-'}</td></tr>
             <tr><td class="px-6 py-3 font-semibold">Foto Perbaikan</td><td class="px-6 py-3">${laporan.latest_history?.damage_photo ? `<img src="/storage/${laporan.latest_history.damage_photo}" alt="Foto Perbaikan" class="max-w-xs border border-gray-300 rounded cursor-pointer max-h-48 bukti-preview" />` : '-'}</td></tr>
             <tr><td class="px-6 py-3 font-semibold">Deskripsi Kerusakan</td><td class="px-6 py-3">${laporan.damage_description}</td></tr>
-            <tr><td class="px-6 py-3 font-semibold">Tanggal Perbaikan</td><td class="px-6 py-3">${laporan.schedules?.repair_date ?? '-'}</td></tr>
+            <tr><td class="px-6 py-3 font-semibold">Tanggal Perbaikan</td><td class="px-6 py-3">${laporan.schedules?.repair_date?.slice(0, 10) ?? '-'}</td></tr>
             ${ekstra}
             ${opsiStatus}
         `;

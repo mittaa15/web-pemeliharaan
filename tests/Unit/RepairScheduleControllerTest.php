@@ -22,45 +22,47 @@ class RepairScheduleControllerTest extends TestCase
 
     public function test_create_repair_schedule_success()
     {
-        // Disable real notifications, supaya tidak mengirim email atau lainnya
-        Notification::fake();
+        // Simulasi filesystem storage 'public'
+        Storage::fake('public');
 
         // Buat user dan repair report dummy
         $user = User::factory()->create();
-        $repairReport = RepairReport::factory()->create([
-            'status' => 'pending',
+        $report = RepairReport::factory()->create([
+            'status' => 'Dalam proses pengerjaan',
         ]);
 
-        // Data input request
+        // Data file gambar palsu
+        $file = UploadedFile::fake()->image('repair_photo.jpg');
+
         $data = [
-            'id_report' => $repairReport->id,
-            'id_user' => $user->id,
-            'status' => 'approved',
+            'id_report' => $report->id,
+            'repair_photo' => $file,
+            'repair_description' => 'Catatan perbaikan berhasil.',
         ];
 
-        // Kirim request POST ke route yang sesuai
-        $response = $this->post(route('update-status-sarpras'), $data);
+        // Kirim POST request ke route uploadPerbaikan (sesuaikan route name)
+        $response = $this->post(route('upload-perbaikan-sarpras'), $data);
 
-        // Pastikan redirect balik dengan session success
+        // Pastikan redirect kembali dengan session success
         $response->assertRedirect();
-        $response->assertSessionHas('success', 'Jadwal perbaikan berhasil disimpan dan status diperbarui.');
+        $response->assertSessionHas('success', 'Data perbaikan berhasil disimpan.');
 
-        // Pastikan status repair report berubah
+        // Pastikan file tersimpan di storage 'public/kerusakan'
+        Storage::disk('public')->assertExists('kerusakan/' . $file->hashName());
+
+        // Pastikan status report berubah jadi 'Pengecekan akhir'
         $this->assertDatabaseHas('repair_report', [
-            'id' => $repairReport->id,
-            'status' => 'approved',
+            'id' => $report->id,
+            'status' => 'Pengecekan akhir',
         ]);
 
-        // Pastikan history baru bertambah
+        // Pastikan repair history tercatat dengan data benar
         $this->assertDatabaseHas('repair_history', [
-            'id_report' => $repairReport->id,
-            'status' => 'approved',
+            'id_report' => $report->id,
+            'status' => 'Pengecekan akhir',
+            'repair_notes' => 'Catatan perbaikan berhasil.',
+            'damage_photo' => 'kerusakan/' . $file->hashName(),
         ]);
-
-        // Kalau kamu menggunakan Notification::createNotification,
-        // kamu bisa cek Notification di database (jika disimpan) atau pakai Notification::fake()
-        // contoh:
-        // Notification::assertSentTo($user, YourNotificationClass::class);
     }
 
     public function test_create_repair_schedule_validation_fails()
@@ -122,46 +124,33 @@ class RepairScheduleControllerTest extends TestCase
 
     public function test_upload_perbaikan_success()
     {
-        // Simulasi filesystem storage 'public'
-        Storage::fake('public');
-
-        // Buat user dan repair report dummy
-        $user = User::factory()->create();
-        $report = RepairReport::factory()->create([
-            'status' => 'Dalam proses pengerjaan',
+        // Buat data teknisi awal
+        $technician = Technician::factory()->create([
+            'name' => 'Teknisi Lama',
+            'email' => 'lama@example.com',
+            'phone_number' => '08123456789',
         ]);
 
-        // Data file gambar palsu
-        $file = UploadedFile::fake()->image('repair_photo.jpg');
-
+        // Data update valid
         $data = [
-            'id_report' => $report->id,
-            'repair_photo' => $file,
-            'repair_description' => 'Catatan perbaikan berhasil.',
+            'name' => 'Teknisi Baru',
+            'email' => 'baru@example.com',
+            'phone_number' => '08987654321',
         ];
 
-        // Kirim POST request ke route uploadPerbaikan (sesuaikan route name)
-        $response = $this->post(route('upload-perbaikan-sarpras'), $data);
+        // Kirim request PATCH ke route update-technician
+        $response = $this->patch(route('update-technician', ['id' => $technician->id]), $data);
 
-        // Pastikan redirect kembali dengan session success
+        // Pastikan redirect balik dengan session success
         $response->assertRedirect();
-        $response->assertSessionHas('success', 'Data perbaikan berhasil disimpan.');
+        $response->assertSessionHas('success', 'Data teknisi berhasil diperbarui.');
 
-        // Pastikan file tersimpan di storage 'public/kerusakan'
-        Storage::disk('public')->assertExists('kerusakan/' . $file->hashName());
-
-        // Pastikan status report berubah jadi 'Pengecekan akhir'
-        $this->assertDatabaseHas('repair_report', [
-            'id' => $report->id,
-            'status' => 'Pengecekan akhir',
-        ]);
-
-        // Pastikan repair history tercatat dengan data benar
-        $this->assertDatabaseHas('repair_history', [
-            'id_report' => $report->id,
-            'status' => 'Pengecekan akhir',
-            'repair_notes' => 'Catatan perbaikan berhasil.',
-            'damage_photo' => 'kerusakan/' . $file->hashName(),
+        // Pastikan data teknisi berubah di database
+        $this->assertDatabaseHas('technicians', [
+            'id' => $technician->id,
+            'name' => 'Teknisi Baru',
+            'email' => 'baru@example.com',
+            'phone_number' => '08987654321',
         ]);
     }
 

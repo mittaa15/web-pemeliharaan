@@ -12,14 +12,14 @@
 </div>
 
 <script>
-setTimeout(() => {
-    const msg = document.getElementById('success-message');
-    if (msg) {
-        msg.style.transition = 'opacity 0.5s ease';
-        msg.style.opacity = '0';
-        setTimeout(() => msg.remove(), 500);
-    }
-}, 3000);
+    setTimeout(() => {
+        const msg = document.getElementById('success-message');
+        if (msg) {
+            msg.style.transition = 'opacity 0.5s ease';
+            msg.style.opacity = '0';
+            setTimeout(() => msg.remove(), 500);
+        }
+    }, 3000);
 </script>
 @endif
 
@@ -347,34 +347,34 @@ setTimeout(() => {
 
 @section('scripts')
 <script>
-const repairReports = @json($RepairReports);
-console.log(repairReports);
+    const repairReports = @json($RepairReports);
+    console.log(repairReports);
 
-let riwayatLaporan = [];
-let currentReportId = null;
+    let riwayatLaporan = [];
+    let currentReportId = null;
 
-function getStatusLabelClass(status) {
-    switch (status.toLowerCase()) {
-        case 'diproses':
-            return 'bg-blue-100 text-blue-800';
-        case 'ditolak':
-            return 'bg-red-100 text-red-800';
-        case 'dijadwalkan':
-            return 'bg-indigo-100 text-indigo-800';
-        case 'dalam proses pengerjaan':
-            return 'bg-yellow-100 text-yellow-800';
-        case 'pengecekan akhir':
-            return 'bg-purple-100 text-purple-800';
-        case 'selesai':
-            return 'bg-green-100 text-green-800';
-        default:
-            return 'bg-gray-100 text-gray-800';
+    function getStatusLabelClass(status) {
+        switch (status.toLowerCase()) {
+            case 'diproses':
+                return 'bg-blue-100 text-blue-800';
+            case 'ditolak':
+                return 'bg-red-100 text-red-800';
+            case 'dijadwalkan':
+                return 'bg-indigo-100 text-indigo-800';
+            case 'dalam proses pengerjaan':
+                return 'bg-yellow-100 text-yellow-800';
+            case 'pengecekan akhir':
+                return 'bg-purple-100 text-purple-800';
+            case 'selesai':
+                return 'bg-green-100 text-green-800';
+            default:
+                return 'bg-gray-100 text-gray-800';
+        }
     }
-}
 
-function addTeknisiSelect() {
-    const container = document.getElementById('teknisiSelectContainer');
-    const selectHTML = `
+    function addTeknisiSelect() {
+        const container = document.getElementById('teknisiSelectContainer');
+        const selectHTML = `
             <div class="teknisi-select-group mb-4 flex gap-2 items-start">
                 <div class="w-full">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Nama Teknisi</label>
@@ -390,127 +390,127 @@ function addTeknisiSelect() {
                     onclick="removeTeknisiField(this)">×</button>
             </div>
         `;
-    container.insertAdjacentHTML('beforeend', selectHTML);
-}
+        container.insertAdjacentHTML('beforeend', selectHTML);
+    }
 
-function removeTeknisiField(button) {
-    button.closest('.teknisi-select-group').remove();
-}
+    function removeTeknisiField(button) {
+        button.closest('.teknisi-select-group').remove();
+    }
 
-document.addEventListener('DOMContentLoaded', () => {
-    const statusCells = document.querySelectorAll('.status-cell');
+    document.addEventListener('DOMContentLoaded', () => {
+        const statusCells = document.querySelectorAll('.status-cell');
 
-    statusCells.forEach(cell => {
-        const status = cell.getAttribute('data-status');
-        const classes = getStatusLabelClass(status);
-        cell.classList.add(...classes.split(' '));
-    });
-});
-
-document.addEventListener('DOMContentLoaded', function() {
-    // Tangkap semua baris tbody
-    const rows = document.querySelectorAll('#laporanBody tr');
-
-    rows.forEach(row => {
-        row.addEventListener('click', function() {
-            const id = this.getAttribute('data-id');
-            if (id) {
-                showDetail(id);
-            }
+        statusCells.forEach(cell => {
+            const status = cell.getAttribute('data-status');
+            const classes = getStatusLabelClass(status);
+            cell.classList.add(...classes.split(' '));
         });
     });
-});
 
-document.getElementById('entries').addEventListener('input', function() {
-    const entries = parseInt(this.value) || 10;
-    renderTable(laporanData.slice(0, entries));
-});
+    document.addEventListener('DOMContentLoaded', function() {
+        // Tangkap semua baris tbody
+        const rows = document.querySelectorAll('#laporanBody tr');
 
-document.getElementById('search').addEventListener('input', function() {
-    const q = this.value.toLowerCase();
-    const filtered = laporanData.filter(l =>
-        l.pengajuan.toLowerCase().includes(q) || l.gedung.toLowerCase().includes(q)
-    );
-    renderTable(filtered);
-});
+        rows.forEach(row => {
+            row.addEventListener('click', function() {
+                const id = this.getAttribute('data-id');
+                if (id) {
+                    showDetail(id);
+                }
+            });
+        });
+    });
 
-function showDetail(id) {
-    currentReportId = id;
-    const laporan = repairReports.find(r => r.id === parseInt(id));
-    console.log(laporan);
-    if (!laporan) return;
-    console.log(laporan.latest_history.id);
+    document.getElementById('entries').addEventListener('input', function() {
+        const entries = parseInt(this.value) || 10;
+        renderTable(laporanData.slice(0, entries));
+    });
 
-    const rejectButton = document.getElementById('rejectButton');
-    const approveButton = document.getElementById('approveButton');
-    const addNoteButton = document.getElementById('addNoteButton');
-    const status = laporan.status.toLowerCase();
+    document.getElementById('search').addEventListener('input', function() {
+        const q = this.value.toLowerCase();
+        const filtered = laporanData.filter(l =>
+            l.pengajuan.toLowerCase().includes(q) || l.gedung.toLowerCase().includes(q)
+        );
+        renderTable(filtered);
+    });
 
-    rejectButton.setAttribute('data-id-report', laporan.id);
-    rejectButton.setAttribute('data-id-user', laporan.id_user);
-    if (status === 'selesai') {
-        rejectButton.classList.add('hidden');
-        approveButton.classList.add('hidden');
-        addNoteButton.classList.add('hidden');
-    } else {
-        rejectButton.classList.remove('hidden');
+    function showDetail(id) {
+        currentReportId = id;
+        const laporan = repairReports.find(r => r.id === parseInt(id));
+        console.log(laporan);
+        if (!laporan) return;
+        console.log(laporan.latest_history.id);
 
-        if (status === 'diproses') {
-            approveButton.classList.remove('hidden');
-        } else {
+        const rejectButton = document.getElementById('rejectButton');
+        const approveButton = document.getElementById('approveButton');
+        const addNoteButton = document.getElementById('addNoteButton');
+        const status = laporan.status.toLowerCase();
+
+        rejectButton.setAttribute('data-id-report', laporan.id);
+        rejectButton.setAttribute('data-id-user', laporan.id_user);
+        if (status === 'selesai') {
+            rejectButton.classList.add('hidden');
             approveButton.classList.add('hidden');
-        }
-
-        // Tambah kontrol tombol "Tambah Catatan"
-        if (status === 'dalam proses pengerjaan' || status === 'pengecekan akhir') {
-            addNoteButton.classList.remove('hidden');
-            if (laporan.latest_history && laporan.latest_history.id) {
-                addNoteButton.setAttribute('data-id-history', laporan.latest_history.id);
-                addNoteButton.setAttribute('data-id-user', laporan.id_user);
-            } else {
-                addNoteButton.setAttribute('data-id', '');
-            }
-        } else {
             addNoteButton.classList.add('hidden');
+        } else {
+            rejectButton.classList.remove('hidden');
+
+            if (status === 'diproses') {
+                approveButton.classList.remove('hidden');
+            } else {
+                approveButton.classList.add('hidden');
+            }
+
+            // Tambah kontrol tombol "Tambah Catatan"
+            if (status === 'dalam proses pengerjaan' || status === 'pengecekan akhir') {
+                addNoteButton.classList.remove('hidden');
+                if (laporan.latest_history && laporan.latest_history.id) {
+                    addNoteButton.setAttribute('data-id-history', laporan.latest_history.id);
+                    addNoteButton.setAttribute('data-id-user', laporan.id_user);
+                } else {
+                    addNoteButton.setAttribute('data-id', '');
+                }
+            } else {
+                addNoteButton.classList.add('hidden');
+            }
         }
-    }
 
-    function formatDateUTC(dateString) {
-        if (!dateString) return '-';
+        function formatDateUTC(dateString) {
+            if (!dateString) return '-';
 
-        const date = new Date(dateString);
-        if (isNaN(date)) return dateString;
+            const date = new Date(dateString);
+            if (isNaN(date)) return dateString;
 
-        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        const day = String(date.getUTCDate()).padStart(2, '0');
-        const month = months[date.getUTCMonth()];
-        const year = date.getUTCFullYear();
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const day = String(date.getUTCDate()).padStart(2, '0');
+            const month = months[date.getUTCMonth()];
+            const year = date.getUTCFullYear();
 
-        return `${day} ${month} ${year}`;
-    }
+            return `${day} ${month} ${year}`;
+        }
 
-    // Tampilkan atau sembunyikan tombol berdasarkan status laporan
-    if (laporan.status.toLowerCase() === 'selesai') {
-        rejectButton.classList.add('hidden');
-        approveButton.classList.add('hidden');
-    } else if (laporan.status.toLowerCase() !== 'diproses') {
-        rejectButton.classList.remove('hidden');
-        approveButton.classList.add('hidden');
-    } else {
-        rejectButton.classList.remove('hidden');
-        approveButton.classList.remove('hidden');
-    }
+        // Tampilkan atau sembunyikan tombol berdasarkan status laporan
+        if (laporan.status.toLowerCase() === 'selesai') {
+            rejectButton.classList.add('hidden');
+            approveButton.classList.add('hidden');
+        } else if (laporan.status.toLowerCase() !== 'diproses') {
+            rejectButton.classList.remove('hidden');
+            approveButton.classList.add('hidden');
+        } else {
+            rejectButton.classList.remove('hidden');
+            approveButton.classList.remove('hidden');
+        }
 
-    let ekstra = '';
-    if (laporan.teknisi && laporan.jadwal) {
-        ekstra = `
+        let ekstra = '';
+        if (laporan.teknisi && laporan.jadwal) {
+            ekstra = `
         <tr><td class="px-6 py-3 font-medium">Teknisi</td><td class="px-6 py-3">${laporan.teknisi}</td></tr>
         <tr><td class="px-6 py-3 font-medium">Jadwal</td><td class="px-6 py-3">${laporan.jadwal}</td></tr>`;
-    }
+        }
 
-    let opsiStatus = '';
-    if (laporan.status !== 'Diproses') {
-        opsiStatus = `
+        let opsiStatus = '';
+        if (laporan.status !== 'Diproses') {
+            opsiStatus = `
             <tr>
                 <td colspan="2" class="px-6 py-3 text-right">
                     <form action="${updateStatusUrl}" method="POST">
@@ -527,9 +527,9 @@ function showDetail(id) {
                 </td>
             </tr>
             `;
-    }
+        }
 
-    document.getElementById('detailContent').innerHTML = `
+        document.getElementById('detailContent').innerHTML = `
             <tr><td class="px-6 py-3 font-semibold">Nomor Pengajuan</td><td class="px-6 py-3">${String(laporan.id).padStart(4, '0')}</td></tr>
             <tr><td class="px-6 py-3 font-semibold">Pengirim Laporan</td><td class="px-6 py-3">${laporan.user?.email ?? '-'}</td></tr>
             <tr><td class="px-6 py-3 font-semibold">Status Laporan Terkini</td><td class="px-6 py-3">${laporan.status}</td></tr>
@@ -542,255 +542,255 @@ function showDetail(id) {
             <tr><td class="px-6 py-3 font-semibold">Bukti Kerusakan</td><td class="px-6 py-3">${laporan.damage_photo? `<img src="/storage/${laporan.damage_photo}" alt="Bukti Kerusakan" class="max-w-xs border border-gray-300 rounded cursor-pointer max-h-48 bukti-preview" />` : '-'}</td></tr>
             <tr><td class="px-6 py-3 font-semibold">Foto Perbaikan</td><td class="px-6 py-3">${laporan.latest_history?.damage_photo ? `<img src="/storage/${laporan.latest_history.damage_photo}" alt="Foto Perbaikan" class="max-w-xs border border-gray-300 rounded cursor-pointer max-h-48 bukti-preview" />` : '-'}</td></tr>
             <tr><td class="px-6 py-3 font-semibold">Deskripsi Kerusakan</td><td class="px-6 py-3">${laporan.damage_description}</td></tr>
-            <tr><td class="px-6 py-3 font-semibold">Tanggal Perbaikan</td><td class="px-6 py-3">${laporan.schedules?.repair_date ?? '-'}</td></tr>
+            <tr><td class="px-6 py-3 font-semibold">Tanggal Perbaikan</td><td class="px-6 py-3">${laporan.schedules?.repair_date?.slice(0, 10) ?? '-'}</td></tr>
             ${ekstra}
             ${opsiStatus}
         `;
 
-    document.getElementById('approveButton').setAttribute('data-id-report', laporan.id);
-    document.getElementById('approveButton').setAttribute('data-id-user', laporan.id_user);
+        document.getElementById('approveButton').setAttribute('data-id-report', laporan.id);
+        document.getElementById('approveButton').setAttribute('data-id-user', laporan.id_user);
 
-    document.getElementById('editForm').action = `/laporan/sarpras/${laporan.id}`;
-    openModal('detailModal');
+        document.getElementById('editForm').action = `/laporan/sarpras/${laporan.id}`;
+        openModal('detailModal');
 
-    const deleteButton = document.getElementById('deleteButton');
-    deleteButton.setAttribute('data-id', laporan.id);
-    const deleteForm = document.getElementById('deleteForm').action = `/delete-report/${laporan.id}`;
+        const deleteButton = document.getElementById('deleteButton');
+        deleteButton.setAttribute('data-id', laporan.id);
+        const deleteForm = document.getElementById('deleteForm').action = `/delete-report/${laporan.id}`;
 
-    if (laporan.status.toLowerCase() === 'diproses' || laporan.status.toLowerCase() === 'ditolak') {
-        deleteButton.classList.remove('hidden');
-        deleteInput.value = laporan.id;
-    } else {
-        deleteButton.classList.add('hidden');
-        deleteInput.value = '';
-    }
-
-}
-
-function ubahStatus(statusBaru) {
-    const laporanIndex = laporanData.findIndex(l => l.pengajuan === currentReportId);
-    if (laporanIndex !== -1 && statusBaru) {
-        const laporan = laporanData[laporanIndex];
-        laporan.status = statusBaru;
-        laporan.riwayatStatus.push({
-            status: statusBaru,
-            tanggal: new Date().toISOString().split('T')[0]
-        });
-
-        if (statusBaru === 'Selesai') {
-            riwayatLaporan.push(laporan);
-            laporanData.splice(laporanIndex, 1);
-        }
-
-        closeModal('detailModal');
-    }
-}
-
-function openScheduleModal(button) {
-    const reportId = button.getAttribute('data-id-report');
-    const userId = button.getAttribute('data-id-user');
-    console.log(reportId);
-    document.getElementById('reportIdInput').value = reportId;
-    document.getElementById('userIdInput').value = userId;
-    openModal('scheduleModal');
-}
-
-function closeScheduleModal() {
-    document.getElementById('scheduleModal').classList.add('hidden');
-}
-
-function openEditModal() {
-    // Tampilkan modal edit
-    document.getElementById('editModal').classList.remove('hidden');
-}
-
-function closeEditModal() {
-    document.getElementById('editModal').classList.add('hidden');
-}
-
-function closeRepairModal() {
-    document.getElementById('repairModal').classList.add('hidden');
-}
-
-function closeTeknisiModal() {
-    document.getElementById('teknisiModal').classList.add('hidden');
-}
-
-function openAddNoteModal() {
-    const idHistory = document.getElementById("addNoteButton").getAttribute("data-id-history");
-    const idUser = document.getElementById("addNoteButton").getAttribute("data-id-user");
-
-    document.getElementById("historieId").value = idHistory;
-    document.getElementById("userId").value = idUser;
-    document.getElementById('addNoteModal').classList.remove('hidden');
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-    const imageModal = document.getElementById('imageModal');
-    const modalImage = document.getElementById('modalImage');
-
-    // Event listener saat gambar bukti diklik
-    document.body.addEventListener('click', function(e) {
-        if (e.target.classList.contains('bukti-preview')) {
-            console.log('Gambar diklik:', e.target.getAttribute('src')); // Debug log
-            const src = e.target.getAttribute('src');
-            modalImage.setAttribute('src', src);
-            imageModal.classList.remove('hidden');
-        }
-    });
-
-    // Klik di luar gambar untuk menutup modal
-    imageModal.addEventListener('click', function(e) {
-        if (e.target === imageModal) {
-            imageModal.classList.add('hidden');
-            modalImage.setAttribute('src', '');
-        }
-    });
-});
-
-function closeDeleteModal() {
-    document.getElementById('deleteModal').classList.add('hidden');
-}
-
-function openRejectModal() {
-    const id = document.getElementById("rejectButton").getAttribute("data-id-report");
-    const idUser = document.getElementById("rejectButton").getAttribute("data-id-user");
-
-    if (!id) {
-        alert("ID tidak tersedia.");
-        return;
-    }
-
-    document.getElementById("rejectReportId").value = id;
-    document.getElementById("rejectUserId").value = idUser;
-    document.getElementById('rejectModal').classList.remove('hidden');
-}
-
-function closeRejectModal() {
-    document.getElementById('rejectModal').classList.add('hidden');
-}
-
-function closeAddNoteModal() {
-    document.getElementById('addNoteModal').classList.add('hidden');
-}
-
-
-function openModal(modalId) {
-    document.getElementById(modalId).classList.remove('hidden');
-}
-
-function closeModal(modalId) {
-    document.getElementById(modalId).classList.add('hidden');
-}
-
-function handleStatusChange(selectEl, reportId, userId) {
-    const status = selectEl.value;
-
-    if (status === "Pengecekan akhir") {
-        document.getElementById('repairReportId').value = reportId;
-        document.getElementById('userIdRepair').value = userId;
-        openModal('repairModal');
-    } else if (status === "Selesai") {
-        document.getElementById('teknisiReportId').value = reportId;
-        document.getElementById('teknisiUserId').value = userId;
-        openModal('teknisiModal');
-    } else {
-        selectEl.form.submit();
-    }
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    const selectedId = @json($selectedId);
-
-    if (selectedId) {
-        // Trigger klik pada baris yang sesuai atau langsung buka modal
-        const targetRow = document.querySelector(`[data-id='${selectedId}']`);
-        if (targetRow) {
-            targetRow.click(); // Pakai cara yang sama untuk buka modal
+        if (laporan.status.toLowerCase() === 'diproses' || laporan.status.toLowerCase() === 'ditolak') {
+            deleteButton.classList.remove('hidden');
+            deleteInput.value = laporan.id;
         } else {
-            console.warn("Data ID tidak ditemukan di tabel.");
+            deleteButton.classList.add('hidden');
+            deleteInput.value = '';
+        }
+
+    }
+
+    function ubahStatus(statusBaru) {
+        const laporanIndex = laporanData.findIndex(l => l.pengajuan === currentReportId);
+        if (laporanIndex !== -1 && statusBaru) {
+            const laporan = laporanData[laporanIndex];
+            laporan.status = statusBaru;
+            laporan.riwayatStatus.push({
+                status: statusBaru,
+                tanggal: new Date().toISOString().split('T')[0]
+            });
+
+            if (statusBaru === 'Selesai') {
+                riwayatLaporan.push(laporan);
+                laporanData.splice(laporanIndex, 1);
+            }
+
+            closeModal('detailModal');
         }
     }
-});
 
-function closeModal() {
-    document.getElementById('detailModal').classList.add('hidden');
-
-    // Ubah URL, hapus query parameter id tanpa reload halaman
-    if (window.history.replaceState) {
-        const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
-        window.history.replaceState({
-            path: newUrl
-        }, '', newUrl);
+    function openScheduleModal(button) {
+        const reportId = button.getAttribute('data-id-report');
+        const userId = button.getAttribute('data-id-user');
+        console.log(reportId);
+        document.getElementById('reportIdInput').value = reportId;
+        document.getElementById('userIdInput').value = userId;
+        openModal('scheduleModal');
     }
-}
 
-document.addEventListener('DOMContentLoaded', () => {
-    const searchInput = document.getElementById('search');
-    const entriesInput = document.getElementById('entries');
-    const tableBody = document.getElementById('laporanBody');
-    const rows = Array.from(tableBody.querySelectorAll('tr'));
-    const prevBtn = document.getElementById('prevPageBtn');
-    const nextBtn = document.getElementById('nextPageBtn');
+    function closeScheduleModal() {
+        document.getElementById('scheduleModal').classList.add('hidden');
+    }
 
-    let currentPage = 1;
+    function openEditModal() {
+        // Tampilkan modal edit
+        document.getElementById('editModal').classList.remove('hidden');
+    }
 
-    function filterRows() {
-        const searchValue = searchInput.value.toLowerCase();
+    function closeEditModal() {
+        document.getElementById('editModal').classList.add('hidden');
+    }
 
-        return rows.filter(row => {
-            return row.textContent.toLowerCase().includes(searchValue);
+    function closeRepairModal() {
+        document.getElementById('repairModal').classList.add('hidden');
+    }
+
+    function closeTeknisiModal() {
+        document.getElementById('teknisiModal').classList.add('hidden');
+    }
+
+    function openAddNoteModal() {
+        const idHistory = document.getElementById("addNoteButton").getAttribute("data-id-history");
+        const idUser = document.getElementById("addNoteButton").getAttribute("data-id-user");
+
+        document.getElementById("historieId").value = idHistory;
+        document.getElementById("userId").value = idUser;
+        document.getElementById('addNoteModal').classList.remove('hidden');
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const imageModal = document.getElementById('imageModal');
+        const modalImage = document.getElementById('modalImage');
+
+        // Event listener saat gambar bukti diklik
+        document.body.addEventListener('click', function(e) {
+            if (e.target.classList.contains('bukti-preview')) {
+                console.log('Gambar diklik:', e.target.getAttribute('src')); // Debug log
+                const src = e.target.getAttribute('src');
+                modalImage.setAttribute('src', src);
+                imageModal.classList.remove('hidden');
+            }
         });
+
+        // Klik di luar gambar untuk menutup modal
+        imageModal.addEventListener('click', function(e) {
+            if (e.target === imageModal) {
+                imageModal.classList.add('hidden');
+                modalImage.setAttribute('src', '');
+            }
+        });
+    });
+
+    function closeDeleteModal() {
+        document.getElementById('deleteModal').classList.add('hidden');
     }
 
-    function renderTable() {
-        const entries = parseInt(entriesInput.value) || 10;
-        const filtered = filterRows();
-        const totalPages = Math.ceil(filtered.length / entries);
+    function openRejectModal() {
+        const id = document.getElementById("rejectButton").getAttribute("data-id-report");
+        const idUser = document.getElementById("rejectButton").getAttribute("data-id-user");
 
-        if (currentPage > totalPages) currentPage = totalPages;
-        if (currentPage < 1) currentPage = 1;
+        if (!id) {
+            alert("ID tidak tersedia.");
+            return;
+        }
 
-        const start = (currentPage - 1) * entries;
-        const end = start + entries;
+        document.getElementById("rejectReportId").value = id;
+        document.getElementById("rejectUserId").value = idUser;
+        document.getElementById('rejectModal').classList.remove('hidden');
+    }
 
-        // Clear table
-        tableBody.innerHTML = '';
+    function closeRejectModal() {
+        document.getElementById('rejectModal').classList.add('hidden');
+    }
 
-        // Append filtered rows
-        filtered.slice(start, end).forEach(row => {
-            tableBody.appendChild(row);
+    function closeAddNoteModal() {
+        document.getElementById('addNoteModal').classList.add('hidden');
+    }
+
+
+    function openModal(modalId) {
+        document.getElementById(modalId).classList.remove('hidden');
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).classList.add('hidden');
+    }
+
+    function handleStatusChange(selectEl, reportId, userId) {
+        const status = selectEl.value;
+
+        if (status === "Pengecekan akhir") {
+            document.getElementById('repairReportId').value = reportId;
+            document.getElementById('userIdRepair').value = userId;
+            openModal('repairModal');
+        } else if (status === "Selesai") {
+            document.getElementById('teknisiReportId').value = reportId;
+            document.getElementById('teknisiUserId').value = userId;
+            openModal('teknisiModal');
+        } else {
+            selectEl.form.submit();
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const selectedId = @json($selectedId);
+
+        if (selectedId) {
+            // Trigger klik pada baris yang sesuai atau langsung buka modal
+            const targetRow = document.querySelector(`[data-id='${selectedId}']`);
+            if (targetRow) {
+                targetRow.click(); // Pakai cara yang sama untuk buka modal
+            } else {
+                console.warn("Data ID tidak ditemukan di tabel.");
+            }
+        }
+    });
+
+    function closeModal() {
+        document.getElementById('detailModal').classList.add('hidden');
+
+        // Ubah URL, hapus query parameter id tanpa reload halaman
+        if (window.history.replaceState) {
+            const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+            window.history.replaceState({
+                path: newUrl
+            }, '', newUrl);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const searchInput = document.getElementById('search');
+        const entriesInput = document.getElementById('entries');
+        const tableBody = document.getElementById('laporanBody');
+        const rows = Array.from(tableBody.querySelectorAll('tr'));
+        const prevBtn = document.getElementById('prevPageBtn');
+        const nextBtn = document.getElementById('nextPageBtn');
+
+        let currentPage = 1;
+
+        function filterRows() {
+            const searchValue = searchInput.value.toLowerCase();
+
+            return rows.filter(row => {
+                return row.textContent.toLowerCase().includes(searchValue);
+            });
+        }
+
+        function renderTable() {
+            const entries = parseInt(entriesInput.value) || 10;
+            const filtered = filterRows();
+            const totalPages = Math.ceil(filtered.length / entries);
+
+            if (currentPage > totalPages) currentPage = totalPages;
+            if (currentPage < 1) currentPage = 1;
+
+            const start = (currentPage - 1) * entries;
+            const end = start + entries;
+
+            // Clear table
+            tableBody.innerHTML = '';
+
+            // Append filtered rows
+            filtered.slice(start, end).forEach(row => {
+                tableBody.appendChild(row);
+            });
+
+            // Disable/enable buttons
+            prevBtn.disabled = currentPage === 1;
+            nextBtn.disabled = currentPage === totalPages || totalPages === 0;
+        }
+
+        // Event listeners
+        searchInput.addEventListener('input', () => {
+            currentPage = 1;
+            renderTable();
         });
 
-        // Disable/enable buttons
-        prevBtn.disabled = currentPage === 1;
-        nextBtn.disabled = currentPage === totalPages || totalPages === 0;
-    }
+        entriesInput.addEventListener('input', () => {
+            if (entriesInput.value < 1) entriesInput.value = 1;
+            currentPage = 1;
+            renderTable();
+        });
 
-    // Event listeners
-    searchInput.addEventListener('input', () => {
-        currentPage = 1;
+        prevBtn.addEventListener('click', () => {
+            currentPage--;
+            renderTable();
+        });
+
+        nextBtn.addEventListener('click', () => {
+            currentPage++;
+            renderTable();
+        });
+
+        // Initial render
         renderTable();
     });
-
-    entriesInput.addEventListener('input', () => {
-        if (entriesInput.value < 1) entriesInput.value = 1;
-        currentPage = 1;
-        renderTable();
-    });
-
-    prevBtn.addEventListener('click', () => {
-        currentPage--;
-        renderTable();
-    });
-
-    nextBtn.addEventListener('click', () => {
-        currentPage++;
-        renderTable();
-    });
-
-    // Initial render
-    renderTable();
-});
 </script>
 @endsection

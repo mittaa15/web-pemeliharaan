@@ -13,22 +13,32 @@ class RepairHistoryFactory extends Factory
     public function definition()
     {
         $status = $this->faker->randomElement([
-            'diproses',
-            'ditolak',
-            'dijadwalkan',
-            'dalam proses pengerjaan',
-            'pengecekan akhir',
-            'selesai'
+            'Diproses',
+            'Ditolak',
+            'Dijadwalkan',
+            'Dalam proses pengerjaan',
+            'Pengecekan akhir',
+            'Selesai'
         ]);
 
         return [
             'id_report' => RepairReport::factory(),
             'status' => $status,
-            'complete_date' => $status === 'selesai'
+            'complete_date' => $status === 'Selesai'
                 ? $this->faker->dateTimeBetween('-1 month', 'now')
-                : now(), // pastikan bukan null
-            'repair_notes' => $this->faker->optional()->sentence(10, true),
-            'damage_photo' => $this->faker->optional()->imageUrl(640, 480, 'technics', true),
+                : now(),
+            'repair_notes' => $this->faker->sentence(10),
+            'damage_photo' => $this->faker->imageUrl(640, 480, 'technics', true),
         ];
+    }
+
+    public function dalamProsesPengerjaan()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'status' => 'Dalam proses pengerjaan',
+                'complete_date' => now(),
+            ];
+        });
     }
 }

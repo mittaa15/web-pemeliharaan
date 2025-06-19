@@ -251,7 +251,7 @@ function showDetail(reportId) {
         <tr><td class="px-6 py-3 font-semibold">Foto Perbaikan</td><td class="px-6 py-3">${repairPhoto}</td></tr>
         <tr><td class="px-6 py-3 font-semibold">Riwayat Perbaikan Terakhir</td><td class="px-6 py-3">${riwayatHtml}</td></tr>
         <tr><td class="px-6 py-3 font-semibold">Nama Teknisi</td><td class="px-6 py-3">${laporan.technicians?.length? laporan.technicians.map(t => t.name).join(', '): '-'}</td></tr>
-        <tr><td class="px-6 py-3 font-semibold">Tanggal Perbaikan</td><td class="px-6 py-3">${laporan.schedules?.repair_date ?? '-'}</td></tr>
+        <tr><td class="px-6 py-3 font-semibold">Tanggal Perbaikan</td><td class="px-6 py-3">${laporan.schedules?.repair_date?.slice(0, 10) ?? '-'}</td></tr>
     `;
 
 
