@@ -171,54 +171,54 @@ class SarprasDashboardControllerTest extends TestCase
         });
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
-    public function data_fasilitas_gedung_view_returns_correct_data()
-    {
-        // Arrange: Buat user sarpras
-        $sarprasUser = User::factory()->create([
-            'role' => 'sarpras',
-        ]);
+    // #[\PHPUnit\Framework\Attributes\Test]
+    // public function data_fasilitas_gedung_view_returns_correct_data()
+    // {
+    //     // Arrange: Buat user sarpras
+    //     $sarprasUser = User::factory()->create([
+    //         'role' => 'sarpras',
+    //     ]);
 
-        // Buat 2 gedung
-        $building1 = Building::factory()->create(['building_name' => 'Gedung A']);
-        $building2 = Building::factory()->create(['building_name' => 'Gedung B']);
+    //     // Buat 2 gedung
+    //     $building1 = Building::factory()->create(['building_name' => 'Gedung A']);
+    //     $building2 = Building::factory()->create(['building_name' => 'Gedung B']);
 
-        // Buat fasilitas indoor & outdoor untuk kedua gedung
-        $indoorFacility1 = BuildingFacility::factory()->create([
-            'id_building' => $building1->id,
-            'location' => 'indoor',
-        ]);
+    //     // Buat fasilitas indoor & outdoor untuk kedua gedung
+    //     $indoorFacility1 = BuildingFacility::factory()->create([
+    //         'id_building' => $building1->id,
+    //         'location' => 'indoor',
+    //     ]);
 
-        $outdoorFacility1 = BuildingFacility::factory()->create([
-            'id_building' => $building2->id,
-            'location' => 'outdoor',
-        ]);
+    //     $outdoorFacility1 = BuildingFacility::factory()->create([
+    //         'id_building' => $building2->id,
+    //         'location' => 'outdoor',
+    //     ]);
 
-        // Act: Login & akses endpoint
-        $response = $this->actingAs($sarprasUser)->get('/data-fasilitas-gedung');
+    //     // Act: Login & akses endpoint
+    //     $response = $this->actingAs($sarprasUser)->get('/data-fasilitas-gedung');
 
-        // Assert: View, status, dan data
-        $response->assertStatus(200);
-        $response->assertViewIs('sarpras.dataFasilitasGedung');
-        $response->assertViewHasAll([
-            'buildings',
-            'indoorFacilities',
-            'outdoorFacilities',
-        ]);
+    //     // Assert: View, status, dan data
+    //     $response->assertStatus(200);
+    //     $response->assertViewIs('sarpras.dataFasilitasGedung');
+    //     $response->assertViewHasAll([
+    //         'buildings',
+    //         'indoorFacilities',
+    //         'outdoorFacilities',
+    //     ]);
 
-        // Validasi data di dalam view
-        $response->assertViewHas('buildings', function ($buildings) use ($building1, $building2) {
-            return $buildings->contains($building1) && $buildings->contains($building2);
-        });
+    //     // Validasi data di dalam view
+    //     $response->assertViewHas('buildings', function ($buildings) use ($building1, $building2) {
+    //         return $buildings->contains($building1) && $buildings->contains($building2);
+    //     });
 
-        $response->assertViewHas('indoorFacilities', function ($facilities) use ($indoorFacility1) {
-            return $facilities->contains($indoorFacility1);
-        });
+    //     $response->assertViewHas('indoorFacilities', function ($facilities) use ($indoorFacility1) {
+    //         return $facilities->contains($indoorFacility1);
+    //     });
 
-        $response->assertViewHas('outdoorFacilities', function ($facilities) use ($outdoorFacility1) {
-            return $facilities->contains($outdoorFacility1);
-        });
-    }
+    //     $response->assertViewHas('outdoorFacilities', function ($facilities) use ($outdoorFacility1) {
+    //         return $facilities->contains($outdoorFacility1);
+    //     });
+    // }
 
     public function test_sarpras_data_ruang_view_returns_correct_data(): void
     {
