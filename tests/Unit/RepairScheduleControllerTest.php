@@ -22,46 +22,41 @@ class RepairScheduleControllerTest extends TestCase
 
     public function test_create_repair_schedule_success()
     {
-        // Simulasi filesystem storage 'public'
-        Storage::fake('public');
+        Notification::fake();
 
-        // Buat user dan repair report dummy
+        // Buat data user dan laporan perbaikan
         $user = User::factory()->create();
-        $report = RepairReport::factory()->create([
-            'status' => 'Dalam proses pengerjaan',
-        ]);
-
-        // Data file gambar palsu
-        $file = UploadedFile::fake()->image('repair_photo.jpg');
+        $repairReport = RepairReport::factory()->create(['status' => 'Pending']);
 
         $data = [
-            'id_report' => $report->id,
-            'repair_photo' => $file,
-            'repair_description' => 'Catatan perbaikan berhasil.',
+            'id_report' => $repairReport->id,
+            'id_user' => $user->id,
+            'repair_date' => now()->addDays(3)->toDateString(),
         ];
 
-        // Kirim POST request ke route uploadPerbaikan (sesuaikan route name)
-        $response = $this->post(route('upload-perbaikan-sarpras'), $data);
+        // Disable middleware supaya tidak kena CSRF token (opsional)
+        $response = $this->withoutMiddleware()->post(route('update-schedule'), $data);
 
-        // Pastikan redirect kembali dengan session success
+        // Pastikan redirect dan session success ada
         $response->assertRedirect();
-        $response->assertSessionHas('success', 'Data perbaikan berhasil disimpan.');
+        $response->assertSessionHas('success', 'Jadwal perbaikan berhasil disimpan dan status diperbarui.');
 
-        // Pastikan file tersimpan di storage 'public/kerusakan'
-        Storage::disk('public')->assertExists('kerusakan/' . $file->hashName());
-
-        // Pastikan status report berubah jadi 'Pengecekan akhir'
-        $this->assertDatabaseHas('repair_report', [
-            'id' => $report->id,
-            'status' => 'Pengecekan akhir',
+        // Pastikan data RepairSchedule tersimpan
+        $this->assertDatabaseHas('repair_schedule', [
+            'id_report' => $repairReport->id,
+            'repair_date' => $data['repair_date'],
         ]);
 
-        // Pastikan repair history tercatat dengan data benar
+        // Pastikan status laporan perbaikan berubah menjadi "Dijadwalkan"
+        $this->assertDatabaseHas('repair_report', [
+            'id' => $repairReport->id,
+            'status' => 'Dijadwalkan',
+        ]);
+
+        // Pastikan data RepairHistory tersimpan dengan status "Dijadwalkan"
         $this->assertDatabaseHas('repair_history', [
-            'id_report' => $report->id,
-            'status' => 'Pengecekan akhir',
-            'repair_notes' => 'Catatan perbaikan berhasil.',
-            'damage_photo' => 'kerusakan/' . $file->hashName(),
+            'id_report' => $repairReport->id,
+            'status' => 'Dijadwalkan',
         ]);
     }
 
