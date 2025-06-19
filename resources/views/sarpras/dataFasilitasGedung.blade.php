@@ -45,9 +45,14 @@
                             </tr>
                             @endforeach
                         </tbody>
-
                     </table>
                 </div>
+            </div>
+        </div>
+        <div class="flex justify-end mt-2">
+            <div class="join grid grid-cols-2 gap-2">
+                <button id="prevPageBtn" class="join-item btn btn-outline bg-primary" disabled>Previous</button>
+                <button id="nextPageBtn" class="join-item btn btn-outline bg-primary">Next</button>
             </div>
         </div>
     </div>
@@ -250,5 +255,67 @@
                 <div class="col-span-3 text-center py-4 text-red-600">Gagal memuat data: ${error.message}</div>`;
             });
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('search');
+        const table = document.getElementById('indoorFacilitiesTable');
+        const tbody = table.querySelector('tbody');
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        const prevBtn = document.getElementById('prevPageBtn');
+        const nextBtn = document.getElementById('nextPageBtn');
+
+        let currentPage = 1;
+        const itemsPerPage = 10;
+        let filteredRows = [...rows];
+
+        function renderTable() {
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+
+            tbody.innerHTML = '';
+            filteredRows.slice(start, end).forEach(row => {
+                tbody.appendChild(row);
+                row.style.display = '';
+            });
+
+            prevBtn.disabled = currentPage === 1;
+            nextBtn.disabled = end >= filteredRows.length;
+        }
+
+        function updateFilter() {
+            const filter = searchInput.value.toLowerCase();
+
+            filteredRows = rows.filter(row => {
+                const name = row.dataset.name?.toLowerCase() || '';
+                const description = row.dataset.description?.toLowerCase() || '';
+                const gedung = row.cells[0]?.textContent.toLowerCase() || '';
+
+                return name.includes(filter) || description.includes(filter) || gedung.includes(
+                    filter);
+            });
+
+            currentPage = 1;
+            renderTable();
+        }
+
+        searchInput.addEventListener('input', updateFilter);
+
+        prevBtn.addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                renderTable();
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            const maxPage = Math.ceil(filteredRows.length / itemsPerPage);
+            if (currentPage < maxPage) {
+                currentPage++;
+                renderTable();
+            }
+        });
+
+        updateFilter();
+    });
 </script>
 @endsection

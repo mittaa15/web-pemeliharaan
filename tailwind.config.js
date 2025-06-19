@@ -17,6 +17,6 @@ module.exports = {
   },
   plugins: [require('daisyui')],
   daisyui: {
-    themes: ["light"], // ✅ ini sudah cukup untuk menjadikan "light" sebagai default  
+    themes: ["light"], // 
   },
 }

@@ -84,16 +84,21 @@
                         </table>
                     </div>
                 </div>
-
-                <form id="deleteFacilityForm" method="POST" class="hidden">
-                    @csrf
-                    @method('DELETE')
-                </form>
             </div>
         </div>
-
+        <div class="flex justify-end mt-2">
+            <div class="join grid grid-cols-2 gap-2">
+                <button id="prevPageBtn" class="join-item btn btn-outline bg-primary" disabled>Previous</button>
+                <button id="nextPageBtn" class="join-item btn btn-outline bg-primary">Next</button>
+            </div>
+        </div>
+        <form id="deleteFacilityForm" method="POST" class="hidden">
+            @csrf
+            @method('DELETE')
+        </form>
     </div>
 </div>
+
 
 <!-- Modal Tambah -->
 <div id="addFacilityModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
@@ -246,208 +251,256 @@
 </div>
 
 <script>
-const facilites = @json($facilities);
-console.log(facilites);
+    const facilites = @json($facilities);
+    console.log(facilites);
 
-function toggleDropdown(button) {
-    const dropdown = button.nextElementSibling;
-    document.querySelectorAll('.dropdown-menu').forEach(menu => {
-        if (menu !== dropdown) {
-            menu.classList.add('hidden');
+    function toggleDropdown(button) {
+        const dropdown = button.nextElementSibling;
+        document.querySelectorAll('.dropdown-menu').forEach(menu => {
+            if (menu !== dropdown) {
+                menu.classList.add('hidden');
+            }
+        });
+        dropdown.classList.toggle('hidden');
+    }
+
+    function openModal(id) {
+        document.getElementById(id).classList.remove('hidden');
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).classList.add('hidden');
+    }
+
+    function closeModalAdd() {
+        document.getElementById('addFacilityModal').classList.add('hidden');
+        location.reload();
+    }
+
+    let selectedFacility = null;
+
+    function showFacilityDetails(button) {
+        const row = button.closest('tr');
+        const facilityId = row.dataset.id;
+        const name = row.dataset.name;
+        const building = row.dataset.building;
+        const number = row.dataset.number;
+        const description = row.dataset.description;
+        selectedFacility = facilites.find(f => f.id == facilityId);
+
+        if (!selectedFacility) {
+            alert('Fasilitas tidak ditemukan!');
+            return;
         }
-    });
-    dropdown.classList.toggle('hidden');
-}
 
-function openModal(id) {
-    document.getElementById(id).classList.remove('hidden');
-}
+        document.getElementById('facilityName').textContent = name;
+        document.getElementById('buildingName').textContent = building;
+        document.getElementById('numberUnits').textContent = number;
+        document.getElementById('facilityDescription').textContent = description;
 
-function closeModal(id) {
-    document.getElementById(id).classList.add('hidden');
-}
 
-function closeModalAdd() {
-    document.getElementById('addFacilityModal').classList.add('hidden');
-    location.reload();
-}
-
-let selectedFacility = null;
-
-function showFacilityDetails(button) {
-    const row = button.closest('tr');
-    const facilityId = row.dataset.id;
-    const name = row.dataset.name;
-    const building = row.dataset.building;
-    const number = row.dataset.number;
-    const description = row.dataset.description;
-    selectedFacility = facilites.find(f => f.id == facilityId);
-
-    if (!selectedFacility) {
-        alert('Fasilitas tidak ditemukan!');
-        return;
+        openModal('detailFacilityModal');
     }
 
-    document.getElementById('facilityName').textContent = name;
-    document.getElementById('buildingName').textContent = building;
-    document.getElementById('numberUnits').textContent = number;
-    document.getElementById('facilityDescription').textContent = description;
+    function openRiwayatModal() {
+        if (!selectedFacility) {
+            alert('Pilih fasilitas terlebih dahulu!');
+            return;
+        }
 
+        const tbody = document.getElementById('historyContent');
+        tbody.innerHTML = ''; // Kosongkan dulu isi tbody
 
-    openModal('detailFacilityModal');
-}
+        if (selectedFacility.repair_reports && selectedFacility.repair_reports.length > 0) {
+            selectedFacility.repair_reports.forEach(report => {
+                const kodeLaporan = report.id ? String(report.id).padStart(4, '0') : '-';
+                const status = report.status ?? '-';
+                const deskripsi = report.damage_description ?? '-';
+                const tanggalSelesai = report.updated_at ? new Date(report.updated_at).toLocaleDateString() :
+                    '-';
 
-function openRiwayatModal() {
-    if (!selectedFacility) {
-        alert('Pilih fasilitas terlebih dahulu!');
-        return;
-    }
-
-    const tbody = document.getElementById('historyContent');
-    tbody.innerHTML = ''; // Kosongkan dulu isi tbody
-
-    if (selectedFacility.repair_reports && selectedFacility.repair_reports.length > 0) {
-        selectedFacility.repair_reports.forEach(report => {
-            const kodeLaporan = report.id ? String(report.id).padStart(4, '0') : '-';
-            const status = report.status ?? '-';
-            const deskripsi = report.damage_description ?? '-';
-            const tanggalSelesai = report.updated_at ? new Date(report.updated_at).toLocaleDateString() :
-                '-';
-
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
                 <td class="px-6 py-3">${kodeLaporan}</td>
                 <td class="px-6 py-3">${status}</td>
                 <td class="px-6 py-3">${deskripsi}</td>
                 <td class="px-6 py-3">${tanggalSelesai}</td>
             `;
+                tbody.appendChild(tr);
+            });
+        } else {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td class="px-6 py-3 text-center" colspan="4">Tidak ada riwayat laporan</td>`;
             tbody.appendChild(tr);
-        });
-    } else {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td class="px-6 py-3 text-center" colspan="4">Tidak ada riwayat laporan</td>`;
-        tbody.appendChild(tr);
+        }
+
+        openModal('riwayatModal');
     }
 
-    openModal('riwayatModal');
-}
+    function editFacility(button) {
+        const row = button.closest('tr');
+        const name = row.dataset.name;
+        const number_units = row.dataset.number;
+        const description = row.dataset.description;
+        const id = row.dataset.id;
 
-function editFacility(button) {
-    const row = button.closest('tr');
-    const name = row.dataset.name;
-    const number_units = row.dataset.number;
-    const description = row.dataset.description;
-    const id = row.dataset.id;
+        document.getElementById('editFacilityName').value = name;
+        document.getElementById('editNumberUnits').value = number_units;
+        document.getElementById('editFacilityDescription').value = description;
 
-    document.getElementById('editFacilityName').value = name;
-    document.getElementById('editNumberUnits').value = number_units;
-    document.getElementById('editFacilityDescription').value = description;
+        document.getElementById('editFacilityForm').action = `/update-facility-room/${id}`;
+        openModal('editFacilityModal');
+    }
 
-    document.getElementById('editFacilityForm').action = `/update-facility-room/${id}`;
-    openModal('editFacilityModal');
-}
+    let deleteFacilityId = null;
 
-let deleteFacilityId = null;
+    function deleteFacility(button) {
+        const row = button.closest('tr');
+        deleteFacilityId = row.dataset.id;
+        const name = row.dataset.name;
 
-function deleteFacility(button) {
-    const row = button.closest('tr');
-    deleteFacilityId = row.dataset.id;
-    const name = row.dataset.name;
+        // Set nama fasilitas di modal
+        document.getElementById('facilityToDeleteName').textContent = `"${name}"`;
 
-    // Set nama fasilitas di modal
-    document.getElementById('facilityToDeleteName').textContent = `"${name}"`;
+        // Tampilkan modal
+        openModal('confirmDeleteModal');
+    }
 
-    // Tampilkan modal
-    openModal('confirmDeleteModal');
-}
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('confirmDeleteButton').addEventListener('click', function() {
+            if (deleteFacilityId) {
+                const form = document.getElementById('deleteFacilityForm');
+                form.action = `/delete-facility-room/${deleteFacilityId}`;
+                form.submit();
+            }
+        });
+    });
 
-document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('confirmDeleteButton').addEventListener('click', function() {
-        if (deleteFacilityId) {
-            const form = document.getElementById('deleteFacilityForm');
-            form.action = `/delete-facility-room/${deleteFacilityId}`;
-            form.submit();
+    document.getElementById('addFacilityForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const form = e.target;
+        const alertBox = document.getElementById('alertBox');
+
+        const formData = {
+            id_room: form.querySelector('select[name="id_room"]').value,
+            facility_name: document.getElementById('addFacilityName').value,
+            number_units: document.getElementById('addFacilityNumberUnits').value,
+            description: document.getElementById('addFacilityDescription').value,
+        };
+
+        fetch("{{ route('create_room_facility') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify(formData),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => Promise.reject(err));
+                }
+                return response.json();
+            })
+            .then(data => {
+                showAlert(data.message || 'Fasilitas ruangan berhasil ditambahkan.', 'success');
+                form.reset();
+                // Optionally reload table here
+            })
+            .catch(error => {
+                let message = 'Terjadi kesalahan.';
+                if (error.errors) {
+                    message = Object.values(error.errors).join('<br>');
+                } else if (error.message) {
+                    message = error.message;
+                }
+                showAlert(message, 'error');
+            });
+
+        function showAlert(message, type = 'success') {
+            alertBox.innerHTML = message;
+            alertBox.classList.remove('hidden', 'bg-red-100', 'bg-green-100', 'text-red-700', 'text-green-700',
+                'border-red-400', 'border-green-400');
+
+            if (type === 'success') {
+                alertBox.classList.add('bg-green-100', 'text-green-700', 'border', 'border-green-400');
+            } else {
+                alertBox.classList.add('bg-red-100', 'text-red-700', 'border', 'border-red-400');
+            }
+
+            setTimeout(() => {
+                alertBox.classList.add('hidden');
+            }, 3000); // Sembunyikan otomatis dalam 4 detik
         }
     });
-});
 
-// Fungsi filter tabel berdasarkan input search
-document.getElementById('search').addEventListener('input', function() {
-    const searchTerm = this.value.toLowerCase();
-    const table = document.getElementById('facilitiesTable');
-    const rows = table.querySelectorAll('tbody tr');
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('search');
+        const table = document.getElementById('facilitiesTable');
+        const tbody = table.querySelector('tbody');
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        const prevBtn = document.getElementById('prevPageBtn');
+        const nextBtn = document.getElementById('nextPageBtn');
 
-    rows.forEach(row => {
-        // Ambil semua teks di setiap kolom dalam satu baris
-        const rowText = row.textContent.toLowerCase();
+        let currentPage = 1;
+        const itemsPerPage = 10;
+        let filteredRows = [...rows];
 
-        // Jika rowText mengandung searchTerm, tampilkan baris, jika tidak sembunyikan
-        if (rowText.includes(searchTerm)) {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
+        function renderTable() {
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+
+            tbody.innerHTML = '';
+            filteredRows.slice(start, end).forEach(row => {
+                tbody.appendChild(row);
+                row.style.display = '';
+            });
+
+            prevBtn.disabled = currentPage === 1;
+            nextBtn.disabled = end >= filteredRows.length;
         }
-    });
-});
 
-document.getElementById('addFacilityForm').addEventListener('submit', function(e) {
-    e.preventDefault();
+        function updateFilter() {
+            const filter = searchInput.value.toLowerCase();
 
-    const form = e.target;
-    const alertBox = document.getElementById('alertBox');
+            filteredRows = rows.filter(row => {
+                const name = row.dataset.name?.toLowerCase() || '';
+                const building = row.dataset.building?.toLowerCase() || '';
+                const description = row.dataset.description?.toLowerCase() || '';
+                const number = row.dataset.number?.toLowerCase() || '';
 
-    const formData = {
-        id_room: form.querySelector('select[name="id_room"]').value,
-        facility_name: document.getElementById('addFacilityName').value,
-        number_units: document.getElementById('addFacilityNumberUnits').value,
-        description: document.getElementById('addFacilityDescription').value,
-    };
+                return (
+                    name.includes(filter) ||
+                    building.includes(filter) ||
+                    description.includes(filter) ||
+                    number.includes(filter)
+                );
+            });
 
-    fetch("{{ route('create_room_facility') }}", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Accept': 'application/json',
-            },
-            body: JSON.stringify(formData),
-        })
-        .then(response => {
-            if (!response.ok) {
-                return response.json().then(err => Promise.reject(err));
+            currentPage = 1;
+            renderTable();
+        }
+
+        searchInput.addEventListener('input', updateFilter);
+
+        prevBtn.addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                renderTable();
             }
-            return response.json();
-        })
-        .then(data => {
-            showAlert(data.message || 'Fasilitas ruangan berhasil ditambahkan.', 'success');
-            form.reset();
-            // Optionally reload table here
-        })
-        .catch(error => {
-            let message = 'Terjadi kesalahan.';
-            if (error.errors) {
-                message = Object.values(error.errors).join('<br>');
-            } else if (error.message) {
-                message = error.message;
-            }
-            showAlert(message, 'error');
         });
 
-    function showAlert(message, type = 'success') {
-        alertBox.innerHTML = message;
-        alertBox.classList.remove('hidden', 'bg-red-100', 'bg-green-100', 'text-red-700', 'text-green-700',
-            'border-red-400', 'border-green-400');
+        nextBtn.addEventListener('click', () => {
+            const maxPage = Math.ceil(filteredRows.length / itemsPerPage);
+            if (currentPage < maxPage) {
+                currentPage++;
+                renderTable();
+            }
+        });
 
-        if (type === 'success') {
-            alertBox.classList.add('bg-green-100', 'text-green-700', 'border', 'border-green-400');
-        } else {
-            alertBox.classList.add('bg-red-100', 'text-red-700', 'border', 'border-red-400');
-        }
-
-        setTimeout(() => {
-            alertBox.classList.add('hidden');
-        }, 3000); // Sembunyikan otomatis dalam 4 detik
-    }
-});
+        updateFilter(); // inisialisasi
+    });
 </script>
 @endsection

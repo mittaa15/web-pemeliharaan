@@ -43,8 +43,13 @@
                         </tr>
                         @endforeach
                     </tbody>
-
                 </table>
+            </div>
+        </div>
+        <div class="flex justify-end mt-2">
+            <div class="join grid grid-cols-2 gap-2">
+                <button id="prevPageBtn" class="join-item btn btn-outline bg-primary" disabled>Previous</button>
+                <button id="nextPageBtn" class="join-item btn btn-outline bg-primary">Next</button>
             </div>
         </div>
     </div>
@@ -102,126 +107,193 @@
 
 
 <script>
-    const facilites = @json($facilities);
+const facilites = @json($facilities);
 
-    console.log('facilites', facilites);
-    // Fungsi untuk mencari fasilitas berdasarkan nama atau deskripsi
-    document.getElementById('search').addEventListener('input', function() {
-        const searchQuery = this.value.toLowerCase();
-        const facilityRows = document.querySelectorAll('.facility-row');
+console.log('facilites', facilites);
+// Fungsi untuk mencari fasilitas berdasarkan nama atau deskripsi
+document.getElementById('search').addEventListener('input', function() {
+    const searchQuery = this.value.toLowerCase();
+    const facilityRows = document.querySelectorAll('.facility-row');
 
-        facilityRows.forEach(row => {
-            const name = row.getAttribute('data-name').toLowerCase();
-            const description = row.getAttribute('data-description').toLowerCase();
-            const building = row.getAttribute('data-building').toLowerCase();
-            const room = row.getAttribute('data-room').toLowerCase();
+    facilityRows.forEach(row => {
+        const name = row.getAttribute('data-name').toLowerCase();
+        const description = row.getAttribute('data-description').toLowerCase();
+        const building = row.getAttribute('data-building').toLowerCase();
+        const room = row.getAttribute('data-room').toLowerCase();
 
-            if (
-                name.includes(searchQuery) ||
-                description.includes(searchQuery) ||
-                building.includes(searchQuery) ||
-                room.includes(searchQuery)
-            ) {
-                row.classList.remove('hidden');
-            } else {
-                row.classList.add('hidden');
-            }
-        });
+        if (
+            name.includes(searchQuery) ||
+            description.includes(searchQuery) ||
+            building.includes(searchQuery) ||
+            room.includes(searchQuery)
+        ) {
+            row.classList.remove('hidden');
+        } else {
+            row.classList.add('hidden');
+        }
     });
+});
 
 
-    function closeRiwayatModal() {
-        document.getElementById('riwayatModal').classList.add('hidden');
+function closeRiwayatModal() {
+    document.getElementById('riwayatModal').classList.add('hidden');
+}
+
+
+let selectedFacility = null;
+
+function showFacilityDetails(button) {
+    const row = button.closest('tr');
+    const facilityId = row.dataset.id;
+    const name = row.dataset.name;
+    const building = row.dataset.building;
+    const number = row.dataset.number;
+    const description = row.dataset.description;
+    selectedFacility = facilites.find(f => f.id == facilityId);
+
+    if (!selectedFacility) {
+        alert('Fasilitas tidak ditemukan!');
+        return;
     }
 
-
-    let selectedFacility = null;
-
-    function showFacilityDetails(button) {
-        const row = button.closest('tr');
-        const facilityId = row.dataset.id;
-        const name = row.dataset.name;
-        const building = row.dataset.building;
-        const number = row.dataset.number;
-        const description = row.dataset.description;
-        selectedFacility = facilites.find(f => f.id == facilityId);
-
-        if (!selectedFacility) {
-            alert('Fasilitas tidak ditemukan!');
-            return;
-        }
-
-        document.getElementById('facilityName').textContent = name;
-        document.getElementById('buildingName').textContent = building;
-        document.getElementById('numberUnits').textContent = number;
-        document.getElementById('facilityDescription').textContent = description;
+    document.getElementById('facilityName').textContent = name;
+    document.getElementById('buildingName').textContent = building;
+    document.getElementById('numberUnits').textContent = number;
+    document.getElementById('facilityDescription').textContent = description;
 
 
-        openModal('facilityDetailModal');
+    openModal('facilityDetailModal');
+}
+
+function openRiwayatModal() {
+    if (!selectedFacility) {
+        alert('Pilih fasilitas terlebih dahulu!');
+        return;
     }
 
-    function openRiwayatModal() {
-        if (!selectedFacility) {
-            alert('Pilih fasilitas terlebih dahulu!');
-            return;
-        }
+    const tbody = document.getElementById('historyContent');
+    tbody.innerHTML = ''; // Kosongkan dulu isi tbody
 
-        const tbody = document.getElementById('historyContent');
-        tbody.innerHTML = ''; // Kosongkan dulu isi tbody
+    if (selectedFacility.repair_reports && selectedFacility.repair_reports.length > 0) {
+        selectedFacility.repair_reports.forEach(report => {
+            const kodeLaporan = report.id ? String(report.id).padStart(4, '0') : '-';
+            const status = report.status ?? '-';
+            const deskripsi = report.damage_description ?? '-';
+            const tanggalSelesai = report.updated_at ? new Date(report.updated_at).toLocaleDateString() : '-';
 
-        if (selectedFacility.repair_reports && selectedFacility.repair_reports.length > 0) {
-            selectedFacility.repair_reports.forEach(report => {
-                const kodeLaporan = report.id ? String(report.id).padStart(4, '0') : '-';
-                const status = report.status ?? '-';
-                const deskripsi = report.damage_description ?? '-';
-                const tanggalSelesai = report.updated_at ? new Date(report.updated_at).toLocaleDateString() : '-';
-
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
                 <td class="px-6 py-3">${kodeLaporan}</td>
                 <td class="px-6 py-3">${status}</td>
                 <td class="px-6 py-3">${deskripsi}</td>
                 <td class="px-6 py-3">${tanggalSelesai}</td>
             `;
-                tbody.appendChild(tr);
-            });
-        } else {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `<td class="px-6 py-3 text-center" colspan="4">Tidak ada riwayat laporan</td>`;
             tbody.appendChild(tr);
-        }
-
-        openModal('riwayatModal');
-    }
-
-
-
-    function closeModal(modalId) {
-        document.getElementById(modalId).classList.add('hidden');
-    }
-
-    // Fungsi filter tabel berdasarkan input search
-    document.getElementById('search').addEventListener('input', function() {
-        const searchTerm = this.value.toLowerCase();
-        const table = document.getElementById('facilitiesTable');
-        const rows = table.querySelectorAll('tbody tr');
-
-        rows.forEach(row => {
-            // Ambil semua teks di setiap kolom dalam satu baris
-            const rowText = row.textContent.toLowerCase();
-
-            // Jika rowText mengandung searchTerm, tampilkan baris, jika tidak sembunyikan
-            if (rowText.includes(searchTerm)) {
-                row.style.display = '';
-            } else {
-                row.style.display = 'none';
-            }
         });
+    } else {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td class="px-6 py-3 text-center" colspan="4">Tidak ada riwayat laporan</td>`;
+        tbody.appendChild(tr);
+    }
+
+    openModal('riwayatModal');
+}
+
+
+
+function closeModal(modalId) {
+    document.getElementById(modalId).classList.add('hidden');
+}
+
+// Fungsi filter tabel berdasarkan input search
+document.getElementById('search').addEventListener('input', function() {
+    const searchTerm = this.value.toLowerCase();
+    const table = document.getElementById('facilitiesTable');
+    const rows = table.querySelectorAll('tbody tr');
+
+    rows.forEach(row => {
+        // Ambil semua teks di setiap kolom dalam satu baris
+        const rowText = row.textContent.toLowerCase();
+
+        // Jika rowText mengandung searchTerm, tampilkan baris, jika tidak sembunyikan
+        if (rowText.includes(searchTerm)) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+});
+
+function openModal(modalId) {
+    document.getElementById(modalId).classList.remove('hidden');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('search');
+    const table = document.getElementById('facilitiesTable');
+    const tbody = table.querySelector('tbody');
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    const prevBtn = document.getElementById('prevPageBtn');
+    const nextBtn = document.getElementById('nextPageBtn');
+
+    let currentPage = 1;
+    const itemsPerPage = 10;
+    let filteredRows = [...rows];
+
+    function renderTable() {
+        const start = (currentPage - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+
+        tbody.innerHTML = '';
+        filteredRows.slice(start, end).forEach(row => {
+            tbody.appendChild(row);
+            row.style.display = '';
+        });
+
+        prevBtn.disabled = currentPage === 1;
+        nextBtn.disabled = end >= filteredRows.length;
+    }
+
+    function updateFilter() {
+        const filter = searchInput.value.toLowerCase();
+
+        filteredRows = rows.filter(row => {
+            const name = row.dataset.name?.toLowerCase() || '';
+            const building = row.dataset.building?.toLowerCase() || '';
+            const description = row.dataset.description?.toLowerCase() || '';
+            const number = row.dataset.number?.toLowerCase() || '';
+
+            return (
+                name.includes(filter) ||
+                building.includes(filter) ||
+                description.includes(filter) ||
+                number.includes(filter)
+            );
+        });
+
+        currentPage = 1;
+        renderTable();
+    }
+
+    searchInput.addEventListener('input', updateFilter);
+
+    prevBtn.addEventListener('click', () => {
+        if (currentPage > 1) {
+            currentPage--;
+            renderTable();
+        }
     });
 
-    function openModal(modalId) {
-        document.getElementById(modalId).classList.remove('hidden');
-    }
+    nextBtn.addEventListener('click', () => {
+        const maxPage = Math.ceil(filteredRows.length / itemsPerPage);
+        if (currentPage < maxPage) {
+            currentPage++;
+            renderTable();
+        }
+    });
+
+    updateFilter(); // inisialisasi
+});
 </script>
 
 @endsection

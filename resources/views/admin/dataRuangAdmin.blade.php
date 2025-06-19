@@ -414,11 +414,6 @@
                 alertBox.classList.remove('hidden');
                 alertBox.classList.add('bg-green-100', 'text-green-700');
                 form.reset();
-
-                // Tutup modal dan reload halaman setelah 1.5 detik
-                setTimeout(() => {
-                    closeModal('addRoomModal');
-                }, 3000);
             })
             .catch(error => {
                 alertBox.textContent = error.message || 'Terjadi kesalahan.';

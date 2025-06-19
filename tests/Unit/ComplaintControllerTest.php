@@ -52,20 +52,26 @@ class ComplaintControllerTest extends TestCase
         $response->assertSessionHasErrors(['report_id', 'keluhan']);
     }
 
-    // public function test_create_complaint_requires_authentication()
-    // {
-    //     $this->withExceptionHandling();
+    public function test_create_complaint_requires_authentication()
+    {
+        $this->withoutMiddleware();
+        $user = User::factory()->create();
+        $repairReport = RepairReport::factory()->create();
 
-    //     $repairReport = RepairReport::factory()->create();
+        $data = [
+            'report_id' => $repairReport->id,
+            'keluhan' => 'Keluhan ini valid dan cukup panjang',
+        ];
 
-    //     $data = [
-    //         'report_id' => $repairReport->id,
-    //         'keluhan' => 'Keluhan valid',
-    //     ];
+        $response = $this->actingAs($user)->post(route('create-keluhan'), $data);
 
-    //     // Simulasi POST tanpa login dan tanpa CSRF token
-    //     $response = $this->post(route('create-keluhan'), $data);
+        $response->assertRedirect();
+        $response->assertSessionHas('success', 'Keluhan berhasil dikirim.');
 
-    //     $response->assertStatus(419); // Karena error CSRF saat belum login
-    // }
+        $this->assertDatabaseHas('complaint', [
+            'id_report' => $repairReport->id,
+            'id_user' => $user->id,
+            'complaint_description' => $data['keluhan'],
+        ]);
+    }
 }

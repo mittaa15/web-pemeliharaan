@@ -90,6 +90,16 @@ class RepairReportController extends Controller
             'complete_date' => Carbon::now(), // atau bisa gunakan now()
         ]);
 
+        $targetUsers = User::whereIn('role', ['sarpras', 'admin'])->get();
+
+        foreach ($targetUsers as $targetUser) {
+            Notification::createNotification(
+                $targetUser->id,
+                'Laporan Baru Masuk',
+                'Silakan cek dan tindak lanjuti laporan terbaru di halaman daftar laporan.'
+            );
+        }
+
         if ($request->input('action') === 'dashboard') {
             return redirect('/dashboard')->with('success', 'Laporan berhasil ditambahkan.');
         }

@@ -29,6 +29,7 @@ class AppServiceProvider extends ServiceProvider
 
             if ($user) {
                 $notifications = Notification::where('id_user', $user->id)
+                    ->where('isRead', false)
                     ->orderBy('created_at', 'desc')
                     ->take(10)
                     ->get();
